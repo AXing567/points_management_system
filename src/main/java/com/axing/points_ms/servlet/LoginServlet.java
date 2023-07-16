@@ -23,11 +23,14 @@ import java.io.IOException;
 public class LoginServlet extends HttpServlet {
     Logger logger = LoggerFactory.getLogger(LoginServlet.class);
 
+
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
         logger.info("Login已启动");
+        response.setHeader("Access-Control-Allow-Origin", "*");
         request.setCharacterEncoding("utf-8");
         response.setContentType("text/html;charset=utf-8");
+
 
 
         LoginRegisterFilter loginRegisterFilter = new LoginRegisterFilter();

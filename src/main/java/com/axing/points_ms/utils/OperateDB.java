@@ -10,9 +10,10 @@ import javax.sql.DataSource;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Properties;
-import java.util.UUID;
 
 /**
  * @projectName: points_management_system
@@ -73,6 +74,98 @@ public class OperateDB {
 
     }
 
+    /*******************************************************************************************************************
+     * 增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增  *
+     * 增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增  *
+     **************************************************************************************************************** */
+
+
+    /**
+     * @param user_id:
+     * @return boolean
+     * @author Axing
+     * @description 将指定user_id的用户插入到user表中
+     * @date 2023/7/16 9:34
+     */
+    public boolean insert_user(String user_id) {
+        try {
+//            查找指定user_id的用户并取得其username、nickname、password、salt
+            pstmt = conn.prepareStatement("select * from user_review where user_id = ?");
+            pstmt.setString(1, user_id);
+            rs = pstmt.executeQuery();
+            String username = null;
+            String nickname = null;
+            String password = null;
+            String salt = null;
+            if (rs.next()) {
+                username = rs.getString("username");
+                nickname = rs.getString("nickname");
+                password = rs.getString("password");
+                salt = rs.getString("salt");
+            }else {
+                logger.error("指定用户id不存在用户审核表（user_review)中");
+                return false;
+            }
+//            将指定用户的username、nickname、password、salt插入到user表中
+            pstmt = conn.prepareStatement("insert into user(username,nickname,password,salt,user_id) values(?,?,?,?,?)");
+            pstmt.setString(1, username);
+            pstmt.setString(2, nickname);
+            pstmt.setString(3, password);
+            pstmt.setString(4, salt);
+            pstmt.setString(5, user_id);
+            if (pstmt.executeUpdate() == 1) {
+                logger.info("指定user_id的用户插入到user表中成功");
+                return true;
+            } else {
+                logger.error("指定user_id的用户插入到user表中失败");
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            logger.error("boolean insert_user(String user_id)函数出现异常");
+            return false;
+        }
+    }
+
+    /**
+     * @param user_id:
+     * @return boolean
+     * @author Axing
+     * @description 插入user_id和nick_name到user_info表中
+     * @date 2023/7/16 9:46
+     */
+    public boolean insert_user_info(String user_id) {
+        try {
+//            查找指定user_id的用户并取得其nickname
+            pstmt = conn.prepareStatement("select nickname from user_review where user_id = ?");
+            pstmt.setString(1, user_id);
+            rs = pstmt.executeQuery();
+            String nickname = null;
+            if (rs.next()) {
+                nickname = rs.getString("nickname");
+            }else {
+                logger.error("指定用户id不存在用户审核表（user_review)中");
+                return false;
+            }
+//            将指定用户的username、nickname、password、salt插入到user表中
+            pstmt = conn.prepareStatement("insert into user_info(user_id,nick_name) values(?,?)");
+            pstmt.setString(1, user_id);
+            pstmt.setString(2, nickname);
+            if (pstmt.executeUpdate() == 1) {
+                logger.info("指定user_id的用户插入到user_info表中成功");
+                return true;
+            } else {
+                logger.error("指定user_id的用户插入到user_info表中失败");
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            logger.error("boolean insert_user_info(String user_id)函数出现异常");
+            return false;
+        }
+    }
+
+
     /**
      * @param content:
      * @param attend:
@@ -93,8 +186,10 @@ public class OperateDB {
      * @description 插中入出席大会数据：第几次大会，是否出席大会，审议报告决议并积极发言，提出建议意见，提出议案，提出质询及以上内容的补充说明至待审核的表
      * @date 2023/7/12 19:56
      */
-    public boolean insert_meeting_review(String content, int attend, int consider, String supplement_consider, int recommendation, String supplement_recommendation, int bill, String supplement_bill,
-                                         int question, String supplement_question, String nickname, String add_id, String picture, String user_id, int total) {
+    public boolean insert_meeting_review(String content, int attend, int consider, String supplement_consider,
+                                         int recommendation, String supplement_recommendation, int bill,
+                                         String supplement_bill, int question, String supplement_question,
+                                         String nickname, String add_id, String picture, String user_id, int total) {
         try {
             pstmt = conn.prepareStatement("insert into meeting_review" +
                     "(content,attend,consider,supplement_consider,recommendation,supplement_recommendation,bill,supplement_bill," +
@@ -241,44 +336,80 @@ public class OperateDB {
      * @param nickname: 姓名
      * @param username: 账号（手机号）
      * @param password: 密码
-     * @return String token，若失败则返回null（已存在该账号）
+     * @return boolean
      * @author Axing
-     * @description 新增用户
+     * @description 新增用户。在用户审核表和用户详细信息表中插入数据
      * @date 2023/7/9 15:36
      */
-    public String insertUser(String nickname, String username, String password) {
-        String token = UUID.randomUUID().toString();
+    public boolean insert_user_review(String nickname, String username, String password) {
         String salt = Encipher.getStringRandom(6);
         password = Encipher.md5(Encipher.md5(password) + salt);
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedDateTime = now.format(formatter);
+        System.out.println("Current time: " + formattedDateTime);
         try {
-            pstmt = conn.prepareStatement("insert into user(nickname,username,password,token,salt) values(?,?,?,?,?)");
+            pstmt = conn.prepareStatement("insert into user_review(nickname,username,password,salt,register_time) values(?,?,?,?,?)");
             pstmt.setString(1, nickname);
             pstmt.setString(2, username);
             pstmt.setString(3, password);
-            pstmt.setString(4, token);
-            pstmt.setString(5, salt);
+            pstmt.setString(4, salt);
+            pstmt.setString(5, formattedDateTime);
             if (pstmt.executeUpdate() == 1) {
-                logger.info("新建用户数据成功");
-                return token;
+                logger.info("账号注册已提交审核");
+                return true;
             } else {
-                logger.error("新建用户数据失败");
-                return null;
+                logger.error("账号注册提交审核失败");
+                return false;
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            logger.error("新建用户数据失败");
+            logger.error("账号注册提交审核失败");
             throw new RuntimeException(e);
         }
     }
 
     /**
+     * @param nickname:
+     * @param username:
+     * @return boolean
+     * @author Axing
+     * @description TODO
+     * @date 2023/7/13 19:43
+     */
+    public boolean insert_user_info(String nickname, String username) {
+        try {
+            pstmt = conn.prepareStatement("insert into user_info(user_id,nick_name) values(?,?)");
+            String user_id = selectUserId(username);
+            pstmt.setString(1, user_id);
+            pstmt.setString(2, nickname);
+            if (pstmt.executeUpdate() == 1) {
+                logger.info("新建用户详细信息数据条成功");
+                return true;
+            } else {
+                logger.error("新建用户详细信息数据条失败");
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            logger.error("新建用户详细信息数据条失败");
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    /*******************************************************************************************************************
+     * 改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改  *
+     * 改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改  *
+     **************************************************************************************************************** */
+    /**
      * @param receiveGson 从前端接收的json字符串
      * @return boolean 成功返回true，失败返回false（已存在该账号）（SQLException）
      * @author Axing
-     * @description 插入用户具体信息
+     * @description 更新用户具体信息
      * @date 2023/7/13 16:11
      */
-    public boolean insert_user_info(String receiveGson) {
+    public boolean update_user_info(String receiveGson) {
         Map<String, String> map;
         Gson gson = new Gson();
         map = gson.fromJson(receiveGson, new TypeToken<Map<String, String>>() {
@@ -304,27 +435,32 @@ public class OperateDB {
         String resume = map.get("resume");
         String token = map.get("token");
         try {
-            pstmt = conn.prepareStatement("insert into user_info values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-            pstmt.setString(1, user_id);
-            pstmt.setString(2, nickname);
-            pstmt.setString(3, gender);
-            pstmt.setString(4, ethnicity);
-            pstmt.setString(5, birthday);
-            pstmt.setString(6, native_place);
-            pstmt.setString(7, party);
-            pstmt.setString(8, work_start_date);
-            pstmt.setString(9, health_status);
-            pstmt.setString(10, education);
-            pstmt.setString(11, graduate_school_major);
-            pstmt.setString(12, degree_technical_title);
-            pstmt.setString(13, expertise);
-            pstmt.setString(14, id_card_number);
-            pstmt.setString(15, employer);
-            pstmt.setString(16, current_position);
-            pstmt.setString(17, phone_number);
-            pstmt.setString(18, postal_code);
-            pstmt.setString(19, resume);
-            pstmt.setString(20, token);
+            String sql = "UPDATE user_info SET nick_name=?, gender=?, ethnicity=?, birthday=?, native_place=?, party=?, " +
+                    "work_start_date=?, health_status=?, education=?, graduate_school_major=?, degree_technical_title=?," +
+                    " expertise=?, id_card_number=?, employer=?, current_position=?, phone_number=?, postal_code=?, " +
+                    "resume=?, token=? WHERE user_id=?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, nickname);
+            pstmt.setString(2, gender);
+            pstmt.setString(3, ethnicity);
+            pstmt.setString(4, birthday);
+            pstmt.setString(5, native_place);
+            pstmt.setString(6, party);
+            pstmt.setString(7, work_start_date);
+            pstmt.setString(8, health_status);
+            pstmt.setString(9, education);
+            pstmt.setString(10, graduate_school_major);
+            pstmt.setString(11, degree_technical_title);
+            pstmt.setString(12, expertise);
+            pstmt.setString(13, id_card_number);
+            pstmt.setString(14, employer);
+            pstmt.setString(15, current_position);
+            pstmt.setString(16, phone_number);
+            pstmt.setString(17, postal_code);
+            pstmt.setString(18, resume);
+            pstmt.setString(19, token);
+            pstmt.setString(20, user_id);
+
             if (pstmt.executeUpdate() == 1) {
                 logger.info("新增用户信息成功");
                 return true;
@@ -339,6 +475,78 @@ public class OperateDB {
         return false;
     }
 
+    /**
+     * @param user_id:
+     * @return boolean
+     * @author Axing
+     * @description 对指定用户的审核状态进行修改
+     * @date 2023/7/15 15:05
+     */
+    public boolean update_user_review(String user_id) {
+        try {
+            pstmt = conn.prepareStatement("update user_review set `check` = 1 where user_id = ?");
+            pstmt.setString(1, user_id);
+            if (pstmt.executeUpdate() == 1) {
+                logger.info("修改用户审核状态成功");
+                return true;
+            } else {
+                logger.error("修改用户审核状态失败");
+                return false;
+            }
+        } catch (SQLException e) {
+            logger.error("修改用户审核状态失败");
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    /*******************************************************************************************************************
+     * 查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查  *
+     * 查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查  *
+     **************************************************************************************************************** */
+
+    /**
+     * @param user_id:
+     * @return ResultSet
+     * @author Axing
+     * @description 根据user_id查询用户的具体信息
+     * @date 2023/7/16 9:06
+     */
+    public ResultSet select_user_info(String user_id) {
+        try {
+            pstmt = conn.prepareStatement("SELECT * FROM user_info WHERE user_id = ?");
+            pstmt.setString(1, user_id);
+            ResultSet rs = pstmt.executeQuery();
+            logger.info("查询用户信息成功");
+            return rs;
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("查询用户信息失败");
+        }
+        return null;
+    }
+
+
+    /**
+     * @param check: 是0或1（0表示未审核，1表示已审核）
+     * @return ResultSet
+     * @author Axing
+     * @description 查询用户信息审核表中所有check字段为形参的数据
+     * @date 2023/7/16 8:09
+     */
+    public ResultSet select_user_review(String check) {
+        try {
+            pstmt = conn.prepareStatement("SELECT user_id, username,nickname,register_time FROM user_review WHERE `check` =" + check);
+            ResultSet rs = pstmt.executeQuery();
+            logger.info("查询用户信息审核表中所有check字段为" + check + "的数据成功");
+            return rs;
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("查询用户信息审核表中所有check字段为" + check + "的数据失败");
+        }
+        return null;
+    }
 
     /**
      * @param userName:
@@ -353,7 +561,7 @@ public class OperateDB {
             pstmt.setString(1, userName);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                return rs.getString("id");
+                return rs.getString("user_id");
             }
             logger.info("查询用户id成功");
         } catch (Exception e) {
@@ -365,16 +573,16 @@ public class OperateDB {
     }
 
     /**
-     * @param token:
+     * @param user_id:
      * @return String
      * @author Axing
-     * @description 查询用户权限
+     * @description 根据user_id查询用户权限
      * @date 2023/7/13 15:52
      */
-    public String select_power(String token) {
+    public String select_power(String user_id) {
         try {
-            pstmt = conn.prepareStatement("SELECT power FROM user WHERE token = ?");
-            pstmt.setString(1, token);
+            pstmt = conn.prepareStatement("SELECT power FROM user WHERE user_id = ?");
+            pstmt.setString(1, user_id);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 return rs.getString("power");
@@ -391,7 +599,7 @@ public class OperateDB {
     /**
      * @param username:
      * @param password:
-     * @return String
+     * @return String token
      * @author Axing
      * @description 查看账号密码是否正确，存在返回token，否则返回null
      * @date 2023/7/13 14:41

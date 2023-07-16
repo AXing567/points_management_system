@@ -1,5 +1,6 @@
 package com.axing.points_ms.servlet.insert;
 
+import com.axing.points_ms.model.dto.Person;
 import com.axing.points_ms.model.dto.Result;
 import com.axing.points_ms.utils.ObtainData;
 import com.axing.points_ms.utils.OperateDB;
@@ -36,13 +37,15 @@ public class InsertUserInfoServlet extends HttpServlet {
         operateDB.connect2();
         Result result = new Result();
         Map<String , Object> mapReturn = new HashMap<String ,Object>();
+        Person person = new Person();
         Gson gson = new Gson();
 
 //        获取前端传来的数据
         String frontData = ObtainData.obtain_data(request);
 
 //        存储前端传来的数据
-        boolean check = operateDB.insert_user_info(frontData);
+        person = gson.fromJson(frontData, Person.class);
+        boolean check = operateDB.update_user_info(frontData);
         if (check){
             result.setSuccess(true);
             result.setMessage("数据上传成功");
@@ -53,6 +56,7 @@ public class InsertUserInfoServlet extends HttpServlet {
 
 //        返回数据给前端
         mapReturn.put("result", result);
+        mapReturn.put("person", person);
         String jsonReturn = gson.toJson(mapReturn);
         response.getWriter().write(jsonReturn);
     }

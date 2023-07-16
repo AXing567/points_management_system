@@ -67,9 +67,10 @@ public class LoginRegisterFilter {
                 logger.info("用户名密码不能为空");
             }
             String token = operateDB.select_token(username, md5(md5(password) + operateDB.selectSalt(username)));
-            String power = operateDB.select_power(token);
+            String user_id = operateDB.selectUserId(username);
+            String power = operateDB.select_power(user_id);
             if (token != null) {
-                result.setId(operateDB.selectUserId(username));
+                result.setId(user_id);
                 result.setSuccess(true);
                 result.setMessage("登录成功");
                 result.setToken(token);
@@ -110,22 +111,20 @@ public class LoginRegisterFilter {
         String nickname = mapReceive.get("nickname").toString();
 //        String loginTime = mapReceive.get("loginTime").toString();
 //        String loginIP = mapReceive.get("loginIP").toString();
-//        String register_time = mapReceive.get("register_time").toString();
         if (operateDB.selectUser(username)) {
             result.setSuccess(false);
             result.setMessage("手机号已存在");
             logger.info("手机号已存在");
         } else {
-            String token;
-            if ((token = operateDB.insertUser(nickname, username, password)) != null) {
-                result.setToken(token);
+//            String ip = NetTools.getClientIPAddress(request);
+            if (operateDB.insert_user_review(nickname, username, password )) {
                 result.setSuccess(true);
-                result.setMessage("注册成功");
-                logger.info("注册成功");
+                result.setMessage("账号注册已提交审核");
+                logger.info("账号注册已提交审核");
             } else {
                 result.setSuccess(false);
-                result.setMessage("注册失败");
-                logger.info("注册失败");
+                result.setMessage("账号注册提交审核失败");
+                logger.info("账号注册提交审核失败");
             }
         }
 //        返回注册结果
