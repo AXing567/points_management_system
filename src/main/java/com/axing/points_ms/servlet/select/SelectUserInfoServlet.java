@@ -25,7 +25,7 @@ import java.util.Map;
  * @package: com.axing.points_ms.servlet
  * @className: SelectUserInfoServlet
  * @author: Axing
- * @description: TODO
+ * @description: 根据user_id查询对应的用户的所有信息
  * @date: 2023/7/16 9:04
  * @version: 1.0
  */
@@ -34,7 +34,7 @@ public class SelectUserInfoServlet extends HttpServlet {
     Logger logger = LoggerFactory.getLogger(SelectUserInfoServlet.class);
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        logger.info("SelectUserInfoServlet.service()被调用");
+        logger.info("被调用");
         request.setCharacterEncoding("utf-8");
         response.setContentType("text/html;charset=utf8");
         OperateDB operateDB = new OperateDB();
@@ -86,6 +86,6 @@ public class SelectUserInfoServlet extends HttpServlet {
 //        响应用户信息至前端
         mapReturn.put("person", person);
         response.getWriter().write(gson.toJson(mapReturn));
-        logger.info("响应用户信息至前端成功");
+        logger.info("返回数据成功");
     }
 }

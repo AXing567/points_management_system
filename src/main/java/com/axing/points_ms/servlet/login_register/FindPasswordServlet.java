@@ -1,4 +1,4 @@
-package com.axing.points_ms.servlet;
+package com.axing.points_ms.servlet.login_register;
 
 import com.axing.points_ms.filter.LoginRegisterFilter;
 import com.axing.points_ms.model.dto.Result;
@@ -29,7 +29,7 @@ public class FindPasswordServlet extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        logger.info("找回密码");
+        logger.info("被调用");
         request.setCharacterEncoding("utf-8");
         response.setContentType("text/html;charset=utf-8");
         Map<String, String> mapReceive = new HashMap<>();
@@ -62,6 +62,6 @@ public class FindPasswordServlet extends HttpServlet {
 //        返回数据
         mapReturn.put("result", gson.toJson(result));
         response.getWriter().write(gson.toJson(mapReturn));
-        logger.info("找回密码结束");
+        logger.info("返回数据成功");
     }
 }

@@ -20,9 +20,9 @@ import java.util.Map;
 /**
  * @projectName: points_management_system
  * @package: com.axing.points_ms.servlet.insert
- * @className: InsertMettingReview
+ * @className: InsertMeetingReview
  * @author: Axing
- * @description: TODO
+ * @description: 插入大会相关的积分变动信息
  * @date: 2023/7/10 16:04
  * @version: 1.0
  */
@@ -33,7 +33,7 @@ public class InsertMeetingReviewServlet extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
-        logger.info("InsertMeetingReviewServlet已启动");
+        logger.info("已启动");
         request.setCharacterEncoding("utf-8");
         response.setContentType("text/html;charset=utf-8");
         OperateDB operateDB = new OperateDB();
@@ -43,16 +43,17 @@ public class InsertMeetingReviewServlet extends HttpServlet {
         Gson gson = new Gson();
         Result result = new Result();
         ObtainData obtainData = new ObtainData();
-        String json;
+        String receiveData;
 
 
         try {
             logger.info("获取前端传来的数据");
 //            获取前端传来的数据
-            json = ObtainData.obtain_data(request);
-            mapReceive = gson.fromJson(json, new TypeToken<Map<String, String>>() {
+            receiveData = ObtainData.obtain_data(request);
+            mapReceive = gson.fromJson(receiveData, new TypeToken<Map<String, String>>() {
             }.getType());
-            String content = mapReceive.get("content");
+            String ordinal = mapReceive.get("ordinal");
+            String session = mapReceive.get("session");
             int attend = Integer.parseInt(mapReceive.get("attend"));
             int consider = Integer.parseInt(mapReceive.get("consider"));
             String supplement_consider = mapReceive.get("supplement_consider");
@@ -71,7 +72,7 @@ public class InsertMeetingReviewServlet extends HttpServlet {
 
 //        存储到数据库
             logger.info("存储到数据库");
-            boolean check = operateDB.insert_meeting_review(content, attend, consider, supplement_consider,
+            boolean check = operateDB.insert_meeting(session, ordinal, attend, consider, supplement_consider,
                     recommendation, supplement_recommendation, bill, supplement_bill, question, supplement_question,
                     nickname, add_id, picture, user_id, total);
             if (check) {

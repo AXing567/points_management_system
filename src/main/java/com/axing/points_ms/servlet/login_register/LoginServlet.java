@@ -1,4 +1,4 @@
-package com.axing.points_ms.filter;
+package com.axing.points_ms.servlet.login_register;
 
 import com.axing.points_ms.model.dto.Result;
 import com.axing.points_ms.utils.ObtainData;
@@ -8,6 +8,8 @@ import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -19,27 +21,27 @@ import static com.axing.points_ms.utils.Encipher.md5;
 
 /**
  * @projectName: points_management_system
- * @package: com.axing.points_ms.filter
- * @className: LoginRegisterFilter
+ * @package: com.example.points_management_system
+ * @className: Login
  * @author: Axing
- * @description: 为登录注册提供过滤器
- * @date: 2023/7/5 18:20
+ * @description: 插入大会相关信息
+ * @date: 2023/7/5 15:51
  * @version: 1.0
  */
-public class LoginRegisterFilter {
-    Result result = new Result();
-    Logger logger = LoggerFactory.getLogger(LoginRegisterFilter.class);
-    int time = 0;
+@WebServlet("/login")
+public class LoginServlet extends HttpServlet {
+    Logger logger = LoggerFactory.getLogger(LoginServlet.class);
 
-    /**
-     * @param request:
-     * @param response:
-     * @return void
-     * @author Axing
-     * @description 根据用户输入的账号密码进行登录，登录成功或失败，响应一个对应的Json串
-     * @date 2023/7/6 13:07
-     */
-    public void login(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        logger.info("被调用");
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        request.setCharacterEncoding("utf-8");
+        response.setContentType("text/html;charset=utf-8");
+
+
+
         Map<String, String> mapReceive;
         Map<String, Object> mapReturn = new HashMap<>();
         Gson gson = new Gson();
@@ -86,55 +88,6 @@ public class LoginRegisterFilter {
         }
         mapReturn.put("result", result);
         response.getWriter().write(gson.toJson(mapReturn));
+        logger.info("返回数据成功");
     }
-
-    /**
-     * @param request:
-     * @param response:
-     * @return void
-     * @author Axing
-     * @description 注册（仅限手机号注册）
-     * @date 2023/7/9 16:13
-     */
-    public void register(HttpServletRequest request, HttpServletResponse response) throws IOException {
-//        获取前端传来的数据并赋值到map中
-        Map<String, Object> mapReceive;
-        Gson gson = new Gson();
-        String receiveData = ObtainData.obtain_data(request);
-        mapReceive = gson.fromJson(receiveData, new TypeToken<Map<String, Object>>() {
-        }.getType());
-        Result result = new Result();
-
-//        存储用户信息
-        OperateDB operateDB = new OperateDB();
-        operateDB.connect2();
-        String username = mapReceive.get("username").toString();
-        String password = mapReceive.get("password").toString();
-        String nickname = mapReceive.get("nickname").toString();
-//        String register_ip = mapReceive.get("register_ip").toString();
-        if (operateDB.selectUser(username)) {
-            result.setSuccess(false);
-            result.setMessage("手机号已存在");
-            logger.info("手机号已存在");
-        } else {
-            if (operateDB.insert_user_review(nickname, username, password )) {
-                result.setSuccess(true);
-                result.setMessage("账号注册已提交审核");
-                logger.info("账号注册已提交审核");
-            } else {
-                result.setSuccess(false);
-                result.setMessage("账号注册提交审核失败");
-                logger.info("账号注册提交审核失败");
-            }
-        }
-//        返回注册结果
-        Map<String, Object> mapReturn = new HashMap<>();
-        mapReturn.put("result", result);
-        response.getWriter().write(gson.toJson(mapReturn));
-    }
-
-
-
-
-
 }

@@ -1,10 +1,11 @@
-package com.axing.points_ms.servlet.insert;
+package com.axing.points_ms.servlet.administrator_review_registration;
 
 import com.axing.points_ms.model.dto.Person;
 import com.axing.points_ms.model.dto.Result;
 import com.axing.points_ms.utils.ObtainData;
 import com.axing.points_ms.utils.OperateDB;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,16 +20,16 @@ import java.util.Map;
 
 /**
  * @projectName: points_management_system
- * @package: com.axing.points_ms.servlet.insert
- * @className: InsertUserInfoServlet
+ * @package: com.axing.points_ms.servlet.administrator_review_registration
+ * @className: RejectRegisterServlet
  * @author: Axing
- * @description: 添加用户详细信息
- * @date: 2023/7/13 16:18
+ * @description: TODO
+ * @date: 2023/7/19 20:30
  * @version: 1.0
  */
-@WebServlet("/insertUserInfo")
-public class InsertUserInfoServlet extends HttpServlet {
-    Logger logger = LoggerFactory.getLogger(InsertUserInfoServlet.class);
+@WebServlet("/rejectRegister")
+public class RejectRegisterServlet extends HttpServlet {
+    Logger logger = LoggerFactory.getLogger(RejectRegisterServlet.class);
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         logger.info("被调用");
@@ -37,29 +38,34 @@ public class InsertUserInfoServlet extends HttpServlet {
         OperateDB operateDB = new OperateDB();
         operateDB.connect2();
         Result result = new Result();
-        Map<String , Object> mapReturn = new HashMap<String ,Object>();
+        Map<String, String> mapReceive = new HashMap<String, String>();
+        Map<String, Object> mapReturn = new HashMap<String, Object>();
         Person person = new Person();
         Gson gson = new Gson();
 
-//        获取前端传来的数据
+
+//        接收客户端发送的审核结果
         String receiveData = ObtainData.obtain_data(request);
+        mapReceive = gson.fromJson(receiveData, new TypeToken<Map<String, String>>() {
+        }.getType());
+        String user_id = mapReceive.get("user_id");
 
-//        存储前端传来的数据
-        person = gson.fromJson(receiveData, Person.class);
-        boolean check = operateDB.update_user_info(receiveData);
-        if (check){
+
+//        将审核结果存入数据库并返回结果给客户端
+        boolean check = operateDB.update_user_review(user_id,2);
+//        将用户信息存入用户表
+
+        if (check) {
             result.setSuccess(true);
-            result.setMessage("数据上传成功");
-        }else {
+            result.setMessage("用户" + user_id + "已被拒绝注册");
+        } else {
             result.setSuccess(false);
-            result.setMessage("数据上传失败");
+            result.setMessage("用户" + user_id + "操作失败");
         }
-
-//        返回数据给前端
         mapReturn.put("result", result);
-        mapReturn.put("person", person);
-        String jsonReturn = gson.toJson(mapReturn);
-        response.getWriter().write(jsonReturn);
+        response.getWriter().write(gson.toJson(mapReturn));
         logger.info("返回数据成功");
+
+
     }
 }

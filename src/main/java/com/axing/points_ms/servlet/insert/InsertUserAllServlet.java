@@ -5,6 +5,7 @@ import com.axing.points_ms.model.dto.Result;
 import com.axing.points_ms.utils.ObtainData;
 import com.axing.points_ms.utils.OperateDB;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,15 +21,16 @@ import java.util.Map;
 /**
  * @projectName: points_management_system
  * @package: com.axing.points_ms.servlet.insert
- * @className: InsertUserInfoServlet
+ * @className: InsertUserAllServlet
  * @author: Axing
- * @description: 添加用户详细信息
- * @date: 2023/7/13 16:18
+ * @description: 管理员注册新用户（在所有用户表中插入新用户）
+ * @date: 2023/7/16 15:32
  * @version: 1.0
  */
-@WebServlet("/insertUserInfo")
-public class InsertUserInfoServlet extends HttpServlet {
-    Logger logger = LoggerFactory.getLogger(InsertUserInfoServlet.class);
+@WebServlet("/insertUserAll")
+public class InsertUserAllServlet extends HttpServlet {
+    Logger logger = LoggerFactory.getLogger(InsertUserAllServlet.class);
+
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         logger.info("被调用");
@@ -37,29 +39,34 @@ public class InsertUserInfoServlet extends HttpServlet {
         OperateDB operateDB = new OperateDB();
         operateDB.connect2();
         Result result = new Result();
-        Map<String , Object> mapReturn = new HashMap<String ,Object>();
+        Map<String, Object> mapReturn = new HashMap<String, Object>();
+        Map<String, String> mapReceive = new HashMap<String, String>();
         Person person = new Person();
         Gson gson = new Gson();
 
 //        获取前端传来的数据
         String receiveData = ObtainData.obtain_data(request);
+        mapReceive = gson.fromJson(receiveData, new TypeToken<Map<String, String>>() {
+        }.getType());
+        String nickname = mapReceive.get("nickname");
+        String username = mapReceive.get("username");
+        String password = mapReceive.get("password");
 
-//        存储前端传来的数据
-        person = gson.fromJson(receiveData, Person.class);
-        boolean check = operateDB.update_user_info(receiveData);
-        if (check){
+//        存储前端传来的数据及响应返回信息
+        if (operateDB.insert_user_all(nickname, username, password)) {
+            logger.info("新建用户成功");
             result.setSuccess(true);
-            result.setMessage("数据上传成功");
-        }else {
+            result.setMessage("新建用户成功");
+        } else {
+            logger.info("新建用户失败");
             result.setSuccess(false);
-            result.setMessage("数据上传失败");
+            result.setMessage("新建用户失败");
         }
-
-//        返回数据给前端
         mapReturn.put("result", result);
-        mapReturn.put("person", person);
-        String jsonReturn = gson.toJson(mapReturn);
-        response.getWriter().write(jsonReturn);
+        String returnData = gson.toJson(mapReturn);
+        response.getWriter().write(returnData);
         logger.info("返回数据成功");
+
+
     }
 }

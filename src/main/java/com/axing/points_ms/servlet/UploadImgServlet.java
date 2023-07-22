@@ -38,6 +38,7 @@ public class UploadImgServlet extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        logger.info("被调用");
         Map<String, Object> mapReturn = new HashMap<>();
         Gson gson = new Gson();
         request.setCharacterEncoding("utf-8");
@@ -48,7 +49,7 @@ public class UploadImgServlet extends HttpServlet {
             Part part = request.getPart("myfile");
             String userId = request.getParameter("userId");
             String fileName = part.getSubmittedFileName();
-            String realPath = request.getServletContext().getRealPath("/");
+            String realPath = "D:\\points_management_system\\points_management_system\\src\\main\\webapp\\download\\";
             String fullPath = renameFile(realPath + fileName, userId + "\\" + md5(fileName));
             part.write(fullPath);
 
@@ -56,6 +57,7 @@ public class UploadImgServlet extends HttpServlet {
             result.setSuccess(true);
             result.setMessage("文件上传成功");
             String path = fullPath.substring(fullPath.indexOf(userId));
+            fullPath = "http://cn-hk-bgp-9.openfrp.top:28224/download/" + path;
             result.setPath(path);
             result.setFullPath(fullPath);
             result.setFileName(fileName);
@@ -63,6 +65,7 @@ public class UploadImgServlet extends HttpServlet {
             response.getWriter().write(gson.toJson(mapReturn));
             logger.info("文件上传成功");
             logger.info("相对文件路径：" + path);
+            logger.info("返回数据成功");
         } catch (ServletException e) {
             result.setSuccess(false);
             result.setMessage("文件上传失败（ServletException）");

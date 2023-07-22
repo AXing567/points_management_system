@@ -1,10 +1,11 @@
-package com.axing.points_ms.servlet.insert;
+package com.axing.points_ms.servlet.select;
 
 import com.axing.points_ms.model.dto.Person;
 import com.axing.points_ms.model.dto.Result;
 import com.axing.points_ms.utils.ObtainData;
 import com.axing.points_ms.utils.OperateDB;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,21 +15,22 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @projectName: points_management_system
- * @package: com.axing.points_ms.servlet.insert
- * @className: InsertUserInfoServlet
+ * @package: com.axing.points_ms.servlet.select
+ * @className: SelectTokenServlet
  * @author: Axing
- * @description: 添加用户详细信息
- * @date: 2023/7/13 16:18
+ * @description: TODO
+ * @date: 2023/7/19 19:53
  * @version: 1.0
  */
-@WebServlet("/insertUserInfo")
-public class InsertUserInfoServlet extends HttpServlet {
-    Logger logger = LoggerFactory.getLogger(InsertUserInfoServlet.class);
+@WebServlet("/selectToken")
+public class SelectTokenServlet extends HttpServlet {
+    Logger logger = LoggerFactory.getLogger(SelectTokenServlet.class);
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         logger.info("被调用");
@@ -37,29 +39,35 @@ public class InsertUserInfoServlet extends HttpServlet {
         OperateDB operateDB = new OperateDB();
         operateDB.connect2();
         Result result = new Result();
-        Map<String , Object> mapReturn = new HashMap<String ,Object>();
+        Map<String, Object> mapReturn = new HashMap<String, Object>();
+        Map<String, String> mapReceive = new HashMap<String, String>();
         Person person = new Person();
         Gson gson = new Gson();
+        String receiveData = null;
+        ResultSet rs = null;
 
-//        获取前端传来的数据
-        String receiveData = ObtainData.obtain_data(request);
+//        获取前端数据 token
+        receiveData = ObtainData.obtain_data(request);
+        mapReceive = gson.fromJson(receiveData, new TypeToken<Map<String, String>>() {
+        }.getType());
+        String token = mapReceive.get("token");
 
-//        存储前端传来的数据
-        person = gson.fromJson(receiveData, Person.class);
-        boolean check = operateDB.update_user_info(receiveData);
-        if (check){
+
+//        验证token正确性
+        String user_id = operateDB.select_token(token);
+        if(!user_id.equals("")){
+            result.setMessage("token正确");
             result.setSuccess(true);
-            result.setMessage("数据上传成功");
+            result.setId(user_id);
         }else {
+            result.setMessage("token错误");
             result.setSuccess(false);
-            result.setMessage("数据上传失败");
         }
 
-//        返回数据给前端
+//        返回数据
         mapReturn.put("result", result);
-        mapReturn.put("person", person);
-        String jsonReturn = gson.toJson(mapReturn);
-        response.getWriter().write(jsonReturn);
-        logger.info("返回数据成功");
+        String returnData = gson.toJson(mapReturn);
+        response.getWriter().write(returnData);
+
     }
 }

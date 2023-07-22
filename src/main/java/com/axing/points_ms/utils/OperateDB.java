@@ -10,8 +10,10 @@ import javax.sql.DataSource;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 
@@ -81,6 +83,36 @@ public class OperateDB {
 
 
     /**
+     * @param nickname:
+     * @param username:
+     * @param password:
+     * @return boolean
+     * @author Axing
+     * @description 管理员注册用户（将用户信息插入到三个表中）
+     * @date 2023/7/16 19:25
+     */
+    public boolean insert_user_all(String nickname, String username, String password) {
+//        将用户信息插入到user_review表中
+        boolean check = false;
+        check = insert_user_review(nickname, username, password);
+//        查看此用户的user_id
+        String user_id = select_user_review_id(username);
+//        在user_review表中通过此用户
+        check = update_user_review(user_id, 1);
+//        在user表中插入此用户
+        check = insert_user(user_id);
+//        在user_info表中插入此用户
+        check = insert_user_info(user_id);
+        if (check) {
+            logger.info("用户注册成功");
+            return true;
+        } else {
+            logger.error("用户注册失败");
+            return false;
+        }
+    }
+
+    /**
      * @param user_id:
      * @return boolean
      * @author Axing
@@ -102,7 +134,7 @@ public class OperateDB {
                 nickname = rs.getString("nickname");
                 password = rs.getString("password");
                 salt = rs.getString("salt");
-            }else {
+            } else {
                 logger.error("指定用户id不存在用户审核表（user_review)中");
                 return false;
             }
@@ -143,7 +175,7 @@ public class OperateDB {
             String nickname = null;
             if (rs.next()) {
                 nickname = rs.getString("nickname");
-            }else {
+            } else {
                 logger.error("指定用户id不存在用户审核表（user_review)中");
                 return false;
             }
@@ -167,7 +199,8 @@ public class OperateDB {
 
 
     /**
-     * @param content:
+     * @param session:
+     * @param ordinal:
      * @param attend:
      * @param consider:
      * @param supplement_consider:
@@ -181,34 +214,39 @@ public class OperateDB {
      * @param add_id:
      * @param picture:
      * @param user_id:
-     * @return boolean
+     * @param total:
+     * @return boolean 插入成功返回true，否则返回false
      * @author Axing
      * @description 插中入出席大会数据：第几次大会，是否出席大会，审议报告决议并积极发言，提出建议意见，提出议案，提出质询及以上内容的补充说明至待审核的表
-     * @date 2023/7/12 19:56
+     * @date 2023/7/20 10:42
      */
-    public boolean insert_meeting_review(String content, int attend, int consider, String supplement_consider,
-                                         int recommendation, String supplement_recommendation, int bill,
-                                         String supplement_bill, int question, String supplement_question,
-                                         String nickname, String add_id, String picture, String user_id, int total) {
+    public boolean insert_meeting(String session, String ordinal, int attend, int consider, String supplement_consider,
+                                  int recommendation, String supplement_recommendation, int bill,
+                                  String supplement_bill, int question, String supplement_question,
+                                  String nickname, String add_id, String picture, String user_id, int total) {
         try {
-            pstmt = conn.prepareStatement("insert into meeting_review" +
-                    "(content,attend,consider,supplement_consider,recommendation,supplement_recommendation,bill,supplement_bill," +
-                    "question,supplement_question,nickname,add_id,picture,user_id, total) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-            pstmt.setString(1, content);
-            pstmt.setInt(2, attend);
-            pstmt.setInt(3, consider);
-            pstmt.setString(4, supplement_consider);
-            pstmt.setInt(5, recommendation);
-            pstmt.setString(6, supplement_recommendation);
-            pstmt.setInt(7, bill);
-            pstmt.setString(8, supplement_bill);
-            pstmt.setInt(9, question);
-            pstmt.setString(10, supplement_question);
-            pstmt.setString(11, nickname);
-            pstmt.setString(12, add_id);
-            pstmt.setString(13, picture);
-            pstmt.setString(14, user_id);
-            pstmt.setInt(15, total);
+            pstmt = conn.prepareStatement("insert into meeting" +
+                    "(session,ordinal,attend,consider,supplement_consider,recommendation,supplement_recommendation,bill,supplement_bill," +
+                    "question,supplement_question,nickname,add_id,picture,user_id, total,time) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            pstmt.setString(1, session);
+            pstmt.setString(2, ordinal);
+            pstmt.setInt(3, attend);
+            pstmt.setInt(4, consider);
+            pstmt.setString(5, supplement_consider);
+            pstmt.setInt(6, recommendation);
+            pstmt.setString(7, supplement_recommendation);
+            pstmt.setInt(8, bill);
+            pstmt.setString(9, supplement_bill);
+            pstmt.setInt(10, question);
+            pstmt.setString(11, supplement_question);
+            pstmt.setString(12, nickname);
+            pstmt.setString(13, add_id);
+            pstmt.setString(14, picture);
+            pstmt.setString(15, user_id);
+            pstmt.setInt(16, total);
+            pstmt.setString(17, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+
+
             if (pstmt.executeUpdate() == 1) {
                 logger.info("新建数据成功");
                 return true;
@@ -230,7 +268,7 @@ public class OperateDB {
      * @description 插入非大会相关积分变动数据
      * @date 2023/7/13 9:52
      */
-    public boolean insert_no_meeting_review(String receiveGson) {
+    public boolean insert_no_meeting(String receiveGson) {
         Map<String, String> map = new Gson().fromJson(receiveGson, new TypeToken<Map<String, String>>() {
         }.getType());
         String user_id = map.get("user_id");
@@ -256,13 +294,14 @@ public class OperateDB {
         String supplement_solve = map.get("supplement_solve");
         int complete = Integer.parseInt(map.get("complete"));
         String supplement_complete = map.get("supplement_complete");
+        String picture = map.get("picture");
         int total = try1 + inspect + activity + activity2 + group_work + survey + material + duty + solve + complete;
         String add_id = map.get("add_id");
         try {
-            pstmt = conn.prepareStatement("insert into no_meeting_review" +
+            pstmt = conn.prepareStatement("insert into no_meeting" +
                     "(user_id,nickname,time,try,supplement_try,inspect,supplement_inspect,activity,supplement_activity,activity2,supplement_activity2," +
                     "group_work,supplement_group_work,survey,supplement_survey,material,supplement_material,duty,supplement_duty,solve,supplement_solve," +
-                    "complete,supplement_complete,total,add_id) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                    "complete,supplement_complete,total,add_id,picture) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             pstmt.setString(1, user_id);
             pstmt.setString(2, nickname);
             pstmt.setString(3, time);
@@ -288,6 +327,7 @@ public class OperateDB {
             pstmt.setString(23, supplement_complete);
             pstmt.setInt(24, total);
             pstmt.setString(25, add_id);
+            pstmt.setString(26, picture);
             if (pstmt.executeUpdate() == 1) {
                 logger.info("非大会相关积分变动数据插入成功");
                 return true;
@@ -300,7 +340,6 @@ public class OperateDB {
             logger.error("非大会相关积分变动数据插入失败");
             throw new RuntimeException(e);
         }
-
     }
 
     /**
@@ -338,7 +377,7 @@ public class OperateDB {
      * @param password: 密码
      * @return boolean
      * @author Axing
-     * @description 新增用户。在用户审核表和用户详细信息表中插入数据
+     * @description 新增用户。在用户审核表中插入数据
      * @date 2023/7/9 15:36
      */
     public boolean insert_user_review(String nickname, String username, String password) {
@@ -402,6 +441,97 @@ public class OperateDB {
      * 改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改  *
      * 改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改  *
      **************************************************************************************************************** */
+
+
+    /**
+     * @param id:
+     * @param reason:
+     * @param select:
+     * @return boolean
+     * @author Axing
+     * @description 根据select选择表（true为meeting表；反之no_meeting表），根据积分记录id更新原因，
+     * @date 2023/7/22 17:31
+     */
+    public boolean update_reason(String id, String reason, boolean select) {
+        try {
+//            select 为true 时插入到meeting表中反之插入到no_meeting表中
+            if (select) {
+                pstmt = conn.prepareStatement("update meeting set reject_reason = ? where id = ?");
+            } else {
+                pstmt = conn.prepareStatement("update no_meeting set reject_reason = ? where id = ?");
+            }
+            pstmt.setString(1, reason);
+            pstmt.setString(2, id);
+            if (pstmt.executeUpdate() == 1) {
+                logger.info("更新原因成功");
+                return true;
+            } else {
+                logger.error("更新原因失败");
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            logger.error("更新原因失败");
+            return false;
+        }
+
+    }
+
+    /**
+     * @param id:
+     * @param check:
+     * @param select: true为meeting表，false为no_meeting表
+     * @return boolean
+     * @author Axing
+     * @description 根据select选择更新meeting或no_meeting表，根据id更新表中的check字段
+     * @date 2023/7/22 10:34
+     */
+    public boolean update_meeting_or_no_meeting_check(String id, int check, boolean select) throws SQLException {
+        if (select) {
+            pstmt = conn.prepareStatement("update meeting set `check` = ? where id = ?");
+            logger.info("更新大会表中的check字段");
+        } else {
+            pstmt = conn.prepareStatement("update no_meeting set `check` = ? where id = ?");
+        }
+        pstmt.setInt(1, check);
+        pstmt.setString(2, id);
+        if (pstmt.executeUpdate() == 1) {
+            logger.info("更新积分表中的check字段成功");
+            return true;
+        } else {
+            logger.error("更新积分表中的check字段失败");
+            return false;
+        }
+    }
+
+
+    /**
+     * @param user_id:
+     * @param token:
+     * @return boolean 是否更新成功user表中的token字段
+     * @author Axing
+     * @description 根据user_id更新用户token
+     * @date 2023/7/18 10:45
+     */
+    public boolean update_user_token(String token, String user_id) {
+        try {
+            pstmt = conn.prepareStatement("update user set `token` = ? where user_id = ?");
+            pstmt.setString(1, token);
+            pstmt.setString(2, user_id);
+            if (pstmt.executeUpdate() == 1) {
+                logger.info("更新user表中的token字段成功");
+                return true;
+            } else {
+                logger.error("更新user表中的token字段失败");
+                return false;
+            }
+        } catch (SQLException e) {
+            logger.error("更新user表中的token字段失败（SQLException）");
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * @param receiveGson 从前端接收的json字符串
      * @return boolean 成功返回true，失败返回false（已存在该账号）（SQLException）
@@ -434,11 +564,14 @@ public class OperateDB {
         String postal_code = map.get("postal_code");
         String resume = map.get("resume");
         String token = map.get("token");
+        String city = map.get("city");
+        String district = map.get("district");
+
         try {
             String sql = "UPDATE user_info SET nick_name=?, gender=?, ethnicity=?, birthday=?, native_place=?, party=?, " +
                     "work_start_date=?, health_status=?, education=?, graduate_school_major=?, degree_technical_title=?," +
                     " expertise=?, id_card_number=?, employer=?, current_position=?, phone_number=?, postal_code=?, " +
-                    "resume=?, token=? WHERE user_id=?";
+                    "resume=?, city = ? , district = ? WHERE user_id=?";
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, nickname);
             pstmt.setString(2, gender);
@@ -458,8 +591,9 @@ public class OperateDB {
             pstmt.setString(16, phone_number);
             pstmt.setString(17, postal_code);
             pstmt.setString(18, resume);
-            pstmt.setString(19, token);
-            pstmt.setString(20, user_id);
+            pstmt.setString(19, city);
+            pstmt.setString(20, district);
+            pstmt.setString(21, user_id);
 
             if (pstmt.executeUpdate() == 1) {
                 logger.info("新增用户信息成功");
@@ -477,15 +611,17 @@ public class OperateDB {
 
     /**
      * @param user_id:
-     * @return boolean
+     * @param check:
+     * @return boolean user_review表中check字段是否修改成功
      * @author Axing
-     * @description 对指定用户的审核状态进行修改
+     * @description 对指定用户的审核状态进行修改(可指定修改为通过或不通过)
      * @date 2023/7/15 15:05
      */
-    public boolean update_user_review(String user_id) {
+    public boolean update_user_review(String user_id, int check) {
         try {
-            pstmt = conn.prepareStatement("update user_review set `check` = 1 where user_id = ?");
-            pstmt.setString(1, user_id);
+            pstmt = conn.prepareStatement("update user_review set `check` = ? where user_id = ?");
+            pstmt.setInt(1, check);
+            pstmt.setString(2, user_id);
             if (pstmt.executeUpdate() == 1) {
                 logger.info("修改用户审核状态成功");
                 return true;
@@ -507,6 +643,199 @@ public class OperateDB {
      **************************************************************************************************************** */
 
     /**
+     * @param id:
+     * @param select:
+     * @return ResultSet
+     * @author Axing
+     * @description 查询meeting表或no_meeting表中指定id和check的全部信息
+     * @date 2023/7/22 18:23
+     */
+    public ResultSet select_points(String id, boolean select) {
+        try {
+            if (select) {
+                pstmt = conn.prepareStatement("SELECT * FROM meeting WHERE id = ?");
+            } else {
+                pstmt = conn.prepareStatement("SELECT * FROM no_meeting WHERE id = ?");
+            }
+            pstmt.setString(1, id);
+            rs = pstmt.executeQuery();
+            logger.info("查询" + (select ? "meeting" : "no_meeting") + "表积分变动信息成功");
+            return rs;
+        } catch (SQLException e) {
+            logger.error("查询" + (select ? "meeting" : "no_meeting") + "表积分变动信息异常");
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * @param user_id:
+     * @param check:
+     * @return ResultSet id,try,inspect,activity,activity2,group_work,survey,material, duty,solve,complete,
+     * nickname,total,reject_reason
+     * @author Axing
+     * @description 根据user_id和check字段查询no_meeting表中的积分记录（用于用户和管理员查看积分记录）
+     * @date 2023/7/22 10:30
+     */
+    public ResultSet select_no_meeting_points(String user_id, int check) {
+        try {
+            pstmt = conn.prepareStatement("SELECT id,try,inspect,activity,activity2,group_work,survey,material," +
+                    "duty,solve,complete,nickname,total,reject_reason FROM no_meeting WHERE user_id = ? AND `check` = ?");
+            pstmt.setString(1, user_id);
+            pstmt.setInt(2, check);
+            rs = pstmt.executeQuery();
+            logger.info("查询非会议期间指定用户、指定check字段的记录成功");
+            return rs;
+        } catch (SQLException e) {
+            logger.error("查询非会议期间指定用户、指定check字段的记录异常");
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * @param user_id:
+     * @param check:
+     * @return ResultSet 返回积分变动id, nickname, session, ordinal,attend,consider, recommendation, bill, question,
+     * total, reject_reason 的结果集
+     * @author Axing
+     * @description 查询会议期间指定user_id、check字段的记录
+     * @date 2023/7/20 15:41
+     */
+    public ResultSet select_meeting_points(String user_id, int check) {
+        try {
+            pstmt = conn.prepareStatement("SELECT id, nickname, session, ordinal,attend,consider, recommendation, " +
+                    "bill, question, total, reject_reason FROM meeting WHERE user_id = ? AND `check` = ?");
+            pstmt.setString(1, user_id);
+            pstmt.setInt(2, check);
+            rs = pstmt.executeQuery();
+            logger.info("查询会议期间指定用户、指定check字段的记录成功");
+            return rs;
+        } catch (SQLException e) {
+            logger.error("查询会议期间指定用户、指定check字段的记录异常");
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * @param token:
+     * @return String user_id
+     * @author Axing
+     * @description 在user表中查询token字段，返回user_id，若不存在则返回空字符串（“”）
+     * @date 2023/7/19 19:57
+     */
+    public String select_token(String token) {
+        try {
+            pstmt = conn.prepareStatement("SELECT user_id FROM user WHERE token = ?");
+            pstmt.setString(1, token);
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                logger.info("查询token成功");
+                return rs.getString("user_id");
+            } else {
+                logger.error("查询token失败");
+                return "";
+            }
+        } catch (SQLException e) {
+            logger.error("查询token失败");
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * @param username:
+     * @return ResultSet
+     * @author Axing
+     * @description 模糊查询username字段，返回一个结果集
+     * @date 2023/7/17 14:51
+     */
+    public ResultSet select_username(String username) {
+        try {
+            pstmt = conn.prepareStatement("SELECT user_id,nickname FROM user WHERE username like ?");
+            pstmt.setString(1, username);
+            rs = pstmt.executeQuery();
+            logger.info("查询用户名成功");
+            return rs;
+        } catch (SQLException e) {
+            logger.error("查询用户名失败");
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * @param city:
+     * @param district:
+     * @return ResultSet
+     * @author Axing
+     * @description 根据市、区返回指定代表信息集（user_id,nickname)
+     * @date 2023/7/17 14:25
+     */
+    public ResultSet select_city_district(String city, String district) {
+        try {
+            pstmt = conn.prepareStatement("SELECT user_id,nick_name FROM user_info WHERE city = ? AND district = ?");
+            pstmt.setString(1, city);
+            pstmt.setString(2, district);
+            rs = pstmt.executeQuery();
+            logger.info("查询城市成功");
+            return rs;
+        } catch (SQLException e) {
+            logger.error("查询城市失败");
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * @param nickname:
+     * @return ResultSet
+     * @author Axing
+     * @description 根据姓氏查询用户信息表中的用户信息
+     * @date 2023/7/16 19:31
+     */
+    public ResultSet select_nickname(String nickname) {
+        try {
+            pstmt = conn.prepareStatement("SELECT user_id,nickname FROM user WHERE nickname like ?");
+            pstmt.setString(1, nickname);
+            rs = pstmt.executeQuery();
+            logger.info("查询姓氏成功");
+            return rs;
+        } catch (SQLException e) {
+            logger.error("查询姓氏失败");
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * @param username:
+     * @return String
+     * @author Axing
+     * @description 根据username（账号，也是手机号）查询用户审核信息表中的user_id
+     * @date 2023/7/16 15:51
+     */
+    public String select_user_review_id(String username) {
+        try {
+            pstmt = conn.prepareStatement("SELECT user_id FROM user_review WHERE username = ?");
+            pstmt.setString(1, username);
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                logger.info("查询用户审核信息表中的user_id成功");
+                return rs.getString("user_id");
+            } else {
+                logger.error("查询用户审核信息表中的user_id失败");
+                return null;
+            }
+        } catch (SQLException e) {
+            logger.error("查询用户审核信息表中的user_id失败");
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * @param user_id:
      * @return ResultSet
      * @author Axing
@@ -526,7 +855,6 @@ public class OperateDB {
         }
         return null;
     }
-
 
     /**
      * @param check: 是0或1（0表示未审核，1表示已审核）
@@ -597,30 +925,30 @@ public class OperateDB {
     }
 
     /**
-     * @param username:
-     * @param password:
-     * @return String token
+     * @param username: 账号
+     * @param password: 密码（加密：md5（md5（原密码）+salt））
+     * @return String user_id
      * @author Axing
-     * @description 查看账号密码是否正确，存在返回token，否则返回null
+     * @description 根据账号密码查看账号密码是否正确，正确返回user_id，错误返回null
      * @date 2023/7/13 14:41
      */
-    public String select_token(String username, String password) {
+    public String select_username_password(String username, String password) {
         try {
-            pstmt = conn.prepareStatement("SELECT token FROM user WHERE username = ? AND password = ?");
+            pstmt = conn.prepareStatement("SELECT user_id FROM user WHERE username = ? AND password = ?");
             pstmt.setString(1, username);
             pstmt.setString(2, password);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                return rs.getString("token");
+                return rs.getString("user_id");
             } else {
                 logger.info("账号密码错误");
-                return null;
+                return "";
             }
         } catch (SQLException e) {
-            logger.error("判断账号密码正确性出现异常");
+            logger.error("判断账号密码正确时出现异常");
             e.printStackTrace();
         }
-        return null;
+        return "";
     }
 
     /**
