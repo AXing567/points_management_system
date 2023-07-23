@@ -17,7 +17,7 @@ import java.io.IOException;
  * @version: 1.0
  */
 public class ObtainData {
-    Logger logger = LoggerFactory.getLogger(ObtainData.class);
+    static Logger logger = LoggerFactory.getLogger(ObtainData.class);
 
     /**
      * @param request: Servlet的request对象
@@ -26,14 +26,21 @@ public class ObtainData {
      * @description 获取前端传来的数据，并以Json的形式返回。调用时可以通过Gson下的fromJson方法将其转换为Map
      * @date 2023/7/5 18:26
      */
-    public static String obtain_data(HttpServletRequest request) throws IOException {
-        StringBuilder requestBody = new StringBuilder();
-        BufferedReader reader = request.getReader();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            requestBody.append(line);
+    public static String obtain_data(HttpServletRequest request)  {
+        try{
+            StringBuilder requestBody = new StringBuilder();
+            BufferedReader reader = request.getReader();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                requestBody.append(line);
+            }
+            reader.close();
+            logger.info("获取前端数据成功");
+            return requestBody.toString();
+        }catch (IOException e){
+            logger.error("获取前端数据失败");
+            e.printStackTrace();
+            return null;
         }
-        reader.close();
-        return requestBody.toString();
     }
 }

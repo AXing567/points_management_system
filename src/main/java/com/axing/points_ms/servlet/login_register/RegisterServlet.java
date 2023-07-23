@@ -1,6 +1,5 @@
 package com.axing.points_ms.servlet.login_register;
 
-import com.axing.points_ms.filter.LoginRegisterFilter;
 import com.axing.points_ms.model.dto.Result;
 import com.axing.points_ms.utils.ObtainData;
 import com.axing.points_ms.utils.OperateDB;
@@ -36,7 +35,6 @@ public class RegisterServlet extends HttpServlet{
         logger.info("被调用");
         request.setCharacterEncoding("utf-8");
         response.setContentType("text/html;charset=utf-8");
-        LoginRegisterFilter loginRegisterFilter = new LoginRegisterFilter();
 
 //        获取前端传来的数据并赋值到map中
         Map<String, Object> mapReceive;

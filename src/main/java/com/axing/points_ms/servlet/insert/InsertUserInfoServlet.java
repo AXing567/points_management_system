@@ -37,8 +37,8 @@ public class InsertUserInfoServlet extends HttpServlet {
         OperateDB operateDB = new OperateDB();
         operateDB.connect2();
         Result result = new Result();
-        Map<String , Object> mapReturn = new HashMap<String ,Object>();
-        Person person = new Person();
+        Map<String , Object> mapReturn = new HashMap<>();
+        Person person;
         Gson gson = new Gson();
 
 //        获取前端传来的数据

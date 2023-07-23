@@ -1,6 +1,5 @@
 package com.axing.points_ms.servlet.update;
 
-import com.axing.points_ms.model.dto.Person;
 import com.axing.points_ms.model.dto.Result;
 import com.axing.points_ms.servlet.user_preview_review.ReviewPointChangesServlet;
 import com.axing.points_ms.utils.ObtainData;
@@ -16,7 +15,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,12 +40,10 @@ public class UpdateMeetingCheckOrNoMeetingCheck extends HttpServlet {
         OperateDB operateDB = new OperateDB();
         operateDB.connect2();
         Result result = new Result();
-        Map<String, Object> mapReturn = new HashMap<String, Object>();
-        Map<String, String> mapReceive = new HashMap<String, String>();
-        Person person = new Person();
+        Map<String, Object> mapReturn = new HashMap<>();
+        Map<String, String> mapReceive;
         Gson gson = new Gson();
-        String receiveData = null;
-        ResultSet rs = null;
+        String receiveData;
 
 //        接收前端数据 id , check ,select
         receiveData = ObtainData.obtain_data(request);

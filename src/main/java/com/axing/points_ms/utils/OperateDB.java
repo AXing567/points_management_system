@@ -35,7 +35,7 @@ public class OperateDB {
 
     /**
      * @author Axing
-     * @description 链接数据库
+     * @description 普通方法链接数据库
      * @date 2023/7/5 18:11
      */
     public void connect() {
@@ -51,8 +51,6 @@ public class OperateDB {
     }
 
     /**
-     * @param :
-     * @return void
      * @author Axing
      * @description 使用Druid连接池连接数据库
      * @date 2023/7/10 15:16
@@ -76,7 +74,7 @@ public class OperateDB {
 
     }
 
-    /*******************************************************************************************************************
+    /* *****************************************************************************************************************
      * 增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增  *
      * 增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增增  *
      **************************************************************************************************************** */
@@ -93,16 +91,16 @@ public class OperateDB {
      */
     public boolean insert_user_all(String nickname, String username, String password) {
 //        将用户信息插入到user_review表中
-        boolean check = false;
+        boolean check;
         check = insert_user_review(nickname, username, password);
 //        查看此用户的user_id
         String user_id = select_user_review_id(username);
 //        在user_review表中通过此用户
-        check = update_user_review(user_id, 1);
+        check &= update_user_review(user_id, 1);
 //        在user表中插入此用户
-        check = insert_user(user_id);
+        check &= insert_user(user_id);
 //        在user_info表中插入此用户
-        check = insert_user_info(user_id);
+        check &= insert_user_info(user_id);
         if (check) {
             logger.info("用户注册成功");
             return true;
@@ -125,10 +123,10 @@ public class OperateDB {
             pstmt = conn.prepareStatement("select * from user_review where user_id = ?");
             pstmt.setString(1, user_id);
             rs = pstmt.executeQuery();
-            String username = null;
-            String nickname = null;
-            String password = null;
-            String salt = null;
+            String username;
+            String nickname;
+            String password;
+            String salt;
             if (rs.next()) {
                 username = rs.getString("username");
                 nickname = rs.getString("nickname");
@@ -172,7 +170,7 @@ public class OperateDB {
             pstmt = conn.prepareStatement("select nickname from user_review where user_id = ?");
             pstmt.setString(1, user_id);
             rs = pstmt.executeQuery();
-            String nickname = null;
+            String nickname;
             if (rs.next()) {
                 nickname = rs.getString("nickname");
             } else {
@@ -408,40 +406,184 @@ public class OperateDB {
         }
     }
 
-    /**
-     * @param nickname:
-     * @param username:
-     * @return boolean
-     * @author Axing
-     * @description TODO
-     * @date 2023/7/13 19:43
-     */
-    public boolean insert_user_info(String nickname, String username) {
-        try {
-            pstmt = conn.prepareStatement("insert into user_info(user_id,nick_name) values(?,?)");
-            String user_id = selectUserId(username);
-            pstmt.setString(1, user_id);
-            pstmt.setString(2, nickname);
-            if (pstmt.executeUpdate() == 1) {
-                logger.info("新建用户详细信息数据条成功");
-                return true;
-            } else {
-                logger.error("新建用户详细信息数据条失败");
-                return false;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            logger.error("新建用户详细信息数据条失败");
-            throw new RuntimeException(e);
-        }
-    }
 
-
-    /*******************************************************************************************************************
+    /* ******************************************************************************************************************
      * 改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改  *
      * 改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改  *
      **************************************************************************************************************** */
 
+    public boolean update_no_meeting(String receiveGson) {
+        Map<String, String> mapReceive = new Gson().fromJson(receiveGson, new TypeToken<Map<String, String>>() {
+        }.getType());
+        int id = Integer.parseInt(mapReceive.get("id"));
+        int user_id = Integer.parseInt(mapReceive.get("user_id"));
+        String nickname = mapReceive.get("nickname");
+        String time = mapReceive.get("time");
+        int tryScore = Integer.parseInt(mapReceive.get("try"));
+        String supplementTry = mapReceive.get("supplement_try");
+        int inspectScore = Integer.parseInt(mapReceive.get("inspect"));
+        String supplementInspect = mapReceive.get("supplement_inspect");
+        int activityScore = Integer.parseInt(mapReceive.get("activity"));
+        String supplementActivity = mapReceive.get("supplement_activity");
+        int activity2Score = Integer.parseInt(mapReceive.get("activity2"));
+        String supplementActivity2 = mapReceive.get("supplement_activity2");
+        int groupWorkScore = Integer.parseInt(mapReceive.get("group_work"));
+        String supplementGroupWork = mapReceive.get("supplement_group_work");
+        int surveyScore = Integer.parseInt(mapReceive.get("survey"));
+        String supplementSurvey = mapReceive.get("supplement_survey");
+        int materialScore = Integer.parseInt(mapReceive.get("material"));
+        String supplementMaterial = mapReceive.get("supplement_material");
+        int dutyScore = Integer.parseInt(mapReceive.get("duty"));
+        String supplementDuty = mapReceive.get("supplement_duty");
+        int solveScore = Integer.parseInt(mapReceive.get("solve"));
+        String supplementSolve = mapReceive.get("supplement_solve");
+        int completeScore = Integer.parseInt(mapReceive.get("complete"));
+        String supplementComplete = mapReceive.get("supplement_complete");
+        int totalScore = tryScore + inspectScore + activityScore + activity2Score + groupWorkScore + surveyScore +
+                materialScore + dutyScore + solveScore + completeScore;
+        String addId = mapReceive.get("add_id");
+        int check = Integer.parseInt(mapReceive.get("check"));
+        String picture = mapReceive.get("picture");
+        String rejectReason = mapReceive.get("reject_reason");
+        try {
+            String updateQuery = "UPDATE no_meeting SET user_id = ?, nickname = ?, time = ?, try = ?, " +
+                    "supplement_try = ?, inspect = ?, supplement_inspect = ?, activity = ?, supplement_activity = ?, " +
+                    "activity2 = ?, supplement_activity2 = ?, group_work = ?, supplement_group_work = ?, survey = ?, " +
+                    "supplement_survey = ?, material = ?, supplement_material = ?, duty = ?, supplement_duty = ?, " +
+                    "solve = ?, supplement_solve = ?, complete = ?, supplement_complete = ?, total = ?, add_id = ?, " +
+                    "`check` = ?, picture = ?, reject_reason = ? WHERE id = ?";
+            pstmt = conn.prepareStatement(updateQuery);
+
+            pstmt.setInt(1, user_id);
+            pstmt.setString(2, nickname);
+            pstmt.setString(3, time);
+            pstmt.setInt(4, tryScore);
+            pstmt.setString(5, supplementTry);
+            pstmt.setInt(6, inspectScore);
+            pstmt.setString(7, supplementInspect);
+            pstmt.setInt(8, activityScore);
+            pstmt.setString(9, supplementActivity);
+            pstmt.setInt(10, activity2Score);
+            pstmt.setString(11, supplementActivity2);
+            pstmt.setInt(12, groupWorkScore);
+            pstmt.setString(13, supplementGroupWork);
+            pstmt.setInt(14, surveyScore);
+            pstmt.setString(15, supplementSurvey);
+            pstmt.setInt(16, materialScore);
+            pstmt.setString(17, supplementMaterial);
+            pstmt.setInt(18, dutyScore);
+            pstmt.setString(19, supplementDuty);
+            pstmt.setInt(20, solveScore);
+            pstmt.setString(21, supplementSolve);
+            pstmt.setInt(22, completeScore);
+            pstmt.setString(23, supplementComplete);
+            pstmt.setInt(24, totalScore);
+            pstmt.setString(25, addId);
+            pstmt.setInt(26, check);
+            pstmt.setString(27, picture);
+            pstmt.setString(28, rejectReason);
+            pstmt.setInt(29, id);
+            if (pstmt.executeUpdate() == 1) {
+                logger.info("更新no_meeting表成功");
+                return true;
+            } else {
+                logger.error("更新no_meeting表失败");
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            logger.error("更新no_meeting表失败");
+        }
+        logger.error("更新no_meeting表失败");
+        return false;
+    }
+
+    /**
+     * @param receiveGson:
+     * @return boolean
+     * @author Axing
+     * @description 更新meeting表中除id, user_id, nickname之外的所有数据。下面为创建此函数时meeting表中所有的字段
+     * id: int
+     * user_id: int
+     * nickname: char(16)
+     * time: char(20)
+     * session: char(2)
+     * ordinal: char(10)
+     * attend: int(2)
+     * consider: int(2)
+     * supplement_consider: char(225)
+     * recommendation: int(2)
+     * supplement_recommendation: char(225)
+     * bill: int(2)
+     * supplement_bill: char(225)
+     * question: int(2)
+     * supplement_question: char(225)
+     * total: int(2)
+     * add_id: char(16)
+     * check: tinyint(1)
+     * picture: char(255)
+     * reject_reason: char(255)
+     * @date 2023/7/22 20:37
+     */
+    public boolean update_meeting(String receiveGson) {
+        Map<String, String> mapReceive = new Gson().fromJson(receiveGson, new TypeToken<Map<String, String>>() {
+        }.getType());
+        String id = mapReceive.get("id");
+        String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+        String session = mapReceive.get("session");
+        String ordinal = mapReceive.get("ordinal");
+        int attend = Integer.parseInt(mapReceive.get("attend"));
+        int consider = Integer.parseInt(mapReceive.get("consider"));
+        String supplement_consider = mapReceive.get("supplement_consider");
+        int recommendation = Integer.parseInt(mapReceive.get("recommendation"));
+        String supplement_recommendation = mapReceive.get("supplement_recommendation");
+        int bill = Integer.parseInt(mapReceive.get("bill"));
+        String supplement_bill = mapReceive.get("supplement_bill");
+        int question = Integer.parseInt(mapReceive.get("question"));
+        String supplement_question = mapReceive.get("supplement_question");
+        int total = attend + consider + recommendation + bill + question;
+        String add_id = mapReceive.get("add_id");
+        int check = Integer.parseInt(mapReceive.get("check"));
+        String picture = mapReceive.get("picture");
+        String reject_reason = mapReceive.get("reject_reason");
+        try {
+            String updateQuery = "UPDATE meeting SET time=?, session=?, ordinal=?, attend=?, consider=?, supplement_consider=?, " +
+                    "recommendation=?, supplement_recommendation=?, bill=?, supplement_bill=?, question=?, " +
+                    "supplement_question=?, total=?, add_id=?, `check`=?, picture=?, reject_reason=? WHERE id=?";
+            pstmt = conn.prepareStatement(updateQuery);
+            pstmt.setString(1, time);
+            pstmt.setString(2, session);
+            pstmt.setString(3, ordinal);
+            pstmt.setInt(4, attend);
+            pstmt.setInt(5, consider);
+            pstmt.setString(6, supplement_consider);
+            pstmt.setInt(7, recommendation);
+            pstmt.setString(8, supplement_recommendation);
+            pstmt.setInt(9, bill);
+            pstmt.setString(10, supplement_bill);
+            pstmt.setInt(11, question);
+            pstmt.setString(12, supplement_question);
+            pstmt.setInt(13, total);
+            pstmt.setString(14, add_id);
+            pstmt.setInt(15, check);
+            pstmt.setString(16, picture);
+            pstmt.setString(17, reject_reason);
+            pstmt.setString(18, id);
+
+            pstmt.executeUpdate();
+            if (pstmt.executeUpdate() == 1) {
+                logger.info("会议期间积分变动数据更新成功");
+                return true;
+            } else {
+                logger.error("会议期间积分变动数据更新失败");
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            logger.error("会议期间积分变动数据更新失败");
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * @param id:
@@ -563,7 +705,6 @@ public class OperateDB {
         String phone_number = map.get("phone_number");
         String postal_code = map.get("postal_code");
         String resume = map.get("resume");
-        String token = map.get("token");
         String city = map.get("city");
         String district = map.get("district");
 
@@ -637,7 +778,7 @@ public class OperateDB {
     }
 
 
-    /*******************************************************************************************************************
+    /* ******************************************************************************************************************
      * 查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查  *
      * 查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查查  *
      **************************************************************************************************************** */

@@ -1,7 +1,5 @@
 package com.axing.points_ms.servlet.select;
 
-import com.axing.points_ms.model.dto.Person;
-import com.axing.points_ms.model.dto.Result;
 import com.axing.points_ms.utils.ObtainData;
 import com.axing.points_ms.utils.OperateDB;
 import com.google.gson.Gson;
@@ -39,13 +37,11 @@ public class SelectUsernameServlet extends HttpServlet {
         response.setContentType("text/html;charset=utf8");
         OperateDB operateDB = new OperateDB();
         operateDB.connect2();
-        Result result = new Result();
-        Map<String, Object> mapReturn = new HashMap<String, Object>();
-        Map<String, String> mapReceive = new HashMap<String, String>();
-        Person person = new Person();
+        Map<String, Object> mapReturn = new HashMap<>();
+        Map<String, String> mapReceive;
         Gson gson = new Gson();
-        String receiveData = null;
-        ResultSet rs = null;
+        String receiveData;
+        ResultSet rs;
 
 //        获取前端传来的数据username
         receiveData = ObtainData.obtain_data(request);
@@ -70,5 +66,6 @@ public class SelectUsernameServlet extends HttpServlet {
 //        响应数据
         response.getWriter().write(gson.toJson(mapReturn));
         logger.info("返回数据成功");
+        operateDB.closeDB();
     }
 }

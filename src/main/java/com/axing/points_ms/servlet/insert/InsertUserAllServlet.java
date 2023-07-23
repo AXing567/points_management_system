@@ -1,6 +1,5 @@
 package com.axing.points_ms.servlet.insert;
 
-import com.axing.points_ms.model.dto.Person;
 import com.axing.points_ms.model.dto.Result;
 import com.axing.points_ms.utils.ObtainData;
 import com.axing.points_ms.utils.OperateDB;
@@ -39,9 +38,8 @@ public class InsertUserAllServlet extends HttpServlet {
         OperateDB operateDB = new OperateDB();
         operateDB.connect2();
         Result result = new Result();
-        Map<String, Object> mapReturn = new HashMap<String, Object>();
-        Map<String, String> mapReceive = new HashMap<String, String>();
-        Person person = new Person();
+        Map<String, Object> mapReturn = new HashMap<>();
+        Map<String, String> mapReceive;
         Gson gson = new Gson();
 
 //        获取前端传来的数据

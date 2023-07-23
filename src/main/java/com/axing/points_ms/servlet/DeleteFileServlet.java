@@ -1,6 +1,5 @@
 package com.axing.points_ms.servlet;
 
-import com.axing.points_ms.model.dto.Person;
 import com.axing.points_ms.model.dto.Result;
 import com.axing.points_ms.utils.ObtainData;
 import com.axing.points_ms.utils.OperateDB;
@@ -16,7 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,12 +39,10 @@ public class DeleteFileServlet extends HttpServlet {
         OperateDB operateDB = new OperateDB();
         operateDB.connect2();
         Result result = new Result();
-        Map<String, Object> mapReturn = new HashMap<String, Object>();
-        Map<String, String> mapReceive = new HashMap<String, String>();
-        Person person = new Person();
+        Map<String, Object> mapReturn = new HashMap<>();
+        Map<String, String> mapReceive;
         Gson gson = new Gson();
-        String receiveData = null;
-        ResultSet rs = null;
+        String receiveData;
 
 //        获取前端传来的数据filePath
         receiveData = ObtainData.obtain_data(request);

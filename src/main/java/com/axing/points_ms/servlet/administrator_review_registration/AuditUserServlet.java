@@ -1,6 +1,5 @@
 package com.axing.points_ms.servlet.administrator_review_registration;
 
-import com.axing.points_ms.model.dto.Person;
 import com.axing.points_ms.model.dto.Result;
 import com.axing.points_ms.utils.ObtainData;
 import com.axing.points_ms.utils.OperateDB;
@@ -38,9 +37,8 @@ public class AuditUserServlet extends HttpServlet {
         OperateDB operateDB = new OperateDB();
         operateDB.connect2();
         Result result = new Result();
-        Map<String, String> mapReceive = new HashMap<String, String>();
-        Map<String, Object> mapReturn = new HashMap<String, Object>();
-        Person person = new Person();
+        Map<String, String> mapReceive;
+        Map<String, Object> mapReturn = new HashMap<>();
         Gson gson = new Gson();
 
 //        接收客户端发送的审核结果

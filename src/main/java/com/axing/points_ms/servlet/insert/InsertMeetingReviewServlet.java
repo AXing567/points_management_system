@@ -42,7 +42,6 @@ public class InsertMeetingReviewServlet extends HttpServlet {
         Map<String, Object> mapReturn = new HashMap<>();
         Gson gson = new Gson();
         Result result = new Result();
-        ObtainData obtainData = new ObtainData();
         String receiveData;
 
 

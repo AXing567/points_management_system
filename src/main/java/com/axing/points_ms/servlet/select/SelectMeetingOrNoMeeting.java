@@ -2,8 +2,6 @@ package com.axing.points_ms.servlet.select;
 
 import com.axing.points_ms.model.dto.Meeting;
 import com.axing.points_ms.model.dto.NoMeeting;
-import com.axing.points_ms.model.dto.Person;
-import com.axing.points_ms.model.dto.Result;
 import com.axing.points_ms.servlet.user_preview_review.ReviewPointChangesServlet;
 import com.axing.points_ms.utils.ObtainData;
 import com.axing.points_ms.utils.OperateDB;
@@ -44,13 +42,11 @@ public class SelectMeetingOrNoMeeting extends HttpServlet {
         response.setContentType("text/html;charset=utf8");
         OperateDB operateDB = new OperateDB();
         operateDB.connect2();
-        Result result = new Result();
-        Map<String, Object> mapReturn = new HashMap<String, Object>();
-        Map<String, String> mapReceive = new HashMap<String, String>();
-        Person person = new Person();
+        Map<String, Object> mapReturn = new HashMap<>();
+        Map<String, String> mapReceive;
         Gson gson = new Gson();
-        String receiveData = null;
-        ResultSet rs = null;
+        String receiveData;
+        ResultSet rs;
         Meeting meeting = new Meeting();
         NoMeeting noMeeting = new NoMeeting();
 
@@ -137,6 +133,7 @@ public class SelectMeetingOrNoMeeting extends HttpServlet {
 //        返回数据
         response.getWriter().write(gson.toJson(mapReturn));
         logger.info("返回数据成功");
+        operateDB.closeDB();
 
 
     }

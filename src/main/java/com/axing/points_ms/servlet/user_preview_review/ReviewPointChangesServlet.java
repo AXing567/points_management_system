@@ -2,8 +2,6 @@ package com.axing.points_ms.servlet.user_preview_review;
 
 import com.axing.points_ms.model.dto.MeetingPreview;
 import com.axing.points_ms.model.dto.NoMeetingPreview;
-import com.axing.points_ms.model.dto.Person;
-import com.axing.points_ms.model.dto.Result;
 import com.axing.points_ms.utils.ObtainData;
 import com.axing.points_ms.utils.OperateDB;
 import com.google.gson.Gson;
@@ -42,13 +40,11 @@ public class ReviewPointChangesServlet extends HttpServlet {
         response.setContentType("text/html;charset=utf8");
         OperateDB operateDB = new OperateDB();
         operateDB.connect2();
-        Result result = new Result();
-        Map<String, Object> mapReturn = new HashMap<String, Object>();
-        Map<String, String> mapReceive = new HashMap<String, String>();
-        Person person = new Person();
+        Map<String, Object> mapReturn = new HashMap<>();
+        Map<String, String> mapReceive;
         Gson gson = new Gson();
-        String receiveData = null;
-        ResultSet rs = null;
+        String receiveData;
+        ResultSet rs;
 
 //        接收前端数据 user_id , check
         receiveData = ObtainData.obtain_data(request);
@@ -119,7 +115,6 @@ public class ReviewPointChangesServlet extends HttpServlet {
 //        返回数据
         response.getWriter().write(gson.toJson(mapReturn));
         logger.info("返回数据成功");
-
-
+        operateDB.closeDB();
     }
 }

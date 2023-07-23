@@ -23,8 +23,7 @@ public class Encipher {
      * @date 2023/7/6 14:02
      */
     public static String md5(String name) {
-        String md5Str = DigestUtils.md5DigestAsHex(name.getBytes());
-        return md5Str;
+        return  DigestUtils.md5DigestAsHex(name.getBytes());
     }
 
 
@@ -41,8 +40,8 @@ public class Encipher {
         //length为几位密码
         for (int i = 0; i < length; i++) {
             //输出字母还是数字
-            int chatTypa = random.nextInt(3);
-            switch (chatTypa) {
+            int chatType = random.nextInt(3);
+            switch (chatType) {
                 case 0:
                     //数字
                     val.append(random.nextInt(10));

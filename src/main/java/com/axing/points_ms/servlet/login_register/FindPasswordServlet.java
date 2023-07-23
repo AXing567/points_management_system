@@ -1,6 +1,5 @@
 package com.axing.points_ms.servlet.login_register;
 
-import com.axing.points_ms.filter.LoginRegisterFilter;
 import com.axing.points_ms.model.dto.Result;
 import com.axing.points_ms.utils.ObtainData;
 import com.axing.points_ms.utils.OperateDB;
@@ -25,14 +24,14 @@ import java.util.Map;
  */
 @WebServlet("/findPassword")
 public class FindPasswordServlet extends HttpServlet {
-    Logger logger = LoggerFactory.getLogger(LoginRegisterFilter.class);
+    Logger logger = LoggerFactory.getLogger(FindPasswordServlet.class);
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         logger.info("被调用");
         request.setCharacterEncoding("utf-8");
         response.setContentType("text/html;charset=utf-8");
-        Map<String, String> mapReceive = new HashMap<>();
+        Map<String, String> mapReceive;
         Map<String, String> mapReturn = new HashMap<>();
         Result result = new Result();
         Gson gson = new Gson();

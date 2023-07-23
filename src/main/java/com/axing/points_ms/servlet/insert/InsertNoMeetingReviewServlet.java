@@ -36,7 +36,7 @@ public class InsertNoMeetingReviewServlet extends HttpServlet {
         OperateDB operateDB = new OperateDB();
         operateDB.connect2();
         Result result = new Result();
-        Map<String , Object> mapReturn = new HashMap<String ,Object>();
+        Map<String , Object> mapReturn = new HashMap<>();
         Gson gson = new Gson();
 
 //        获取前端数据

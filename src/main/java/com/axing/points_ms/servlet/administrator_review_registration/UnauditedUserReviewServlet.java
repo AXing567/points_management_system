@@ -1,7 +1,6 @@
 package com.axing.points_ms.servlet.administrator_review_registration;
 
 import com.axing.points_ms.model.dto.Person;
-import com.axing.points_ms.model.dto.Result;
 import com.axing.points_ms.utils.OperateDB;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
@@ -39,8 +38,7 @@ public class UnauditedUserReviewServlet extends HttpServlet {
         response.setContentType("text/html;charset=utf8");
         OperateDB operateDB = new OperateDB();
         operateDB.connect2();
-        Result result = new Result();
-        Map<String, Object> mapReturn = new LinkedHashMap<String, Object>();
+        Map<String, Object> mapReturn = new LinkedHashMap<>();
         Gson gson = new Gson();
 
 //        向客户端发送待审核的用户信息
