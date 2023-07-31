@@ -1,6 +1,7 @@
-package com.axing.points_ms.servlet;
+package com.axing.points_ms.servlet.delete;
 
 import com.axing.points_ms.model.dto.Result;
+import com.axing.points_ms.servlet.user_preview_review.ReviewPointChangesServlet;
 import com.axing.points_ms.utils.ObtainData;
 import com.axing.points_ms.utils.OperateDB;
 import com.google.gson.Gson;
@@ -13,23 +14,13 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * @projectName: points_management_system
- * @package: com.axing.points_ms.servlet
- * @className: DeleteFileServlet
- * @author: Axing
- * @description: 根据fileName，user_id删除文件
- * @date: 2023/7/18 8:52
- * @version: 1.0
- */
-@WebServlet("/deleteFile")
-public class DeleteFileServlet extends HttpServlet {
-    Logger logger = LoggerFactory.getLogger(DeleteFileServlet.class);
+@WebServlet("/DeletePointsInfo")
+public class DeletePointsInfo extends HttpServlet {
+    Logger logger = LoggerFactory.getLogger(ReviewPointChangesServlet.class);
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -44,34 +35,29 @@ public class DeleteFileServlet extends HttpServlet {
         Gson gson = new Gson();
         String receiveData;
 
-//        获取前端传来的数据 fileName，user_id
+//        接收前端数据 id , check
         receiveData = ObtainData.obtain_data(request);
         mapReceive = gson.fromJson(receiveData, new TypeToken<Map<String, String>>() {
         }.getType());
-        String fileName = mapReceive.get("fileName");
-        String user_id = mapReceive.get("user_id");
+        String id = mapReceive.get("id");
+        int select = Integer.parseInt(mapReceive.get("select"));
+        logger.info("获取前端数据成功");
 
-//        根据fileName删除文件
-        String realPath = "D:\\points_management_system\\points_management_system\\src\\main\\webapp\\download\\";
-        File fileToDelete = new File(realPath + user_id + "\\" + fileName);
-        logger.info("realPath:" + realPath);
-        logger.info("fileToDelete:" + fileToDelete);
-        logger.info("fileToDelete.exists():" + fileToDelete.exists());
-
-        if (fileToDelete.delete()) {
+//      处理数据
+        if (operateDB.delete_points_info(id, select == 1)) {
+            result.setMessage("删除成功");
             result.setSuccess(true);
-            result.setMessage("文件删除成功");
-            logger.info("文件删除成功");
+            logger.info("删除成功");
         } else {
+            result.setMessage("删除失败");
             result.setSuccess(false);
-            result.setMessage("文件删除失败");
-            logger.info("文件删除失败");
+            logger.error("删除失败");
         }
-
-//        返回是否成功
+//        返回数据
         mapReturn.put("result", result);
         response.getWriter().write(gson.toJson(mapReturn));
         logger.info("返回数据成功");
+
 
     }
 }

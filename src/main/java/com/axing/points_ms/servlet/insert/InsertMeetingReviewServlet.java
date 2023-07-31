@@ -62,10 +62,10 @@ public class InsertMeetingReviewServlet extends HttpServlet {
             String supplement_bill = mapReceive.get("supplement_bill");
             int question = Integer.parseInt(mapReceive.get("question"));
             String supplement_question = mapReceive.get("supplement_question");
-            String nickname = mapReceive.get("nickname");
             String add_id = mapReceive.get("add_id");
             String picture = mapReceive.get("picture");
             String user_id = mapReceive.get("user_id");
+            String nickname = operateDB.select_nickname(Integer.parseInt(user_id));
             int total = attend + consider + recommendation + bill + question;
 
 

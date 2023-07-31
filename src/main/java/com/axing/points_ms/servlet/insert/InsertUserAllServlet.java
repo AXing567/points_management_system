@@ -50,6 +50,19 @@ public class InsertUserAllServlet extends HttpServlet {
         String username = mapReceive.get("username");
         String password = mapReceive.get("password");
 
+//        检查用户是否存在
+        String id = operateDB.select_user_review_id(username);
+        if (id != null) {
+            logger.info("用户已存在");
+            result.setSuccess(false);
+            result.setMessage("用户已存在");
+            mapReturn.put("result", result);
+            String returnData = gson.toJson(mapReturn);
+            response.getWriter().write(returnData);
+            logger.info("返回数据成功");
+            return;
+        }
+
 //        存储前端传来的数据及响应返回信息
         if (operateDB.insert_user_all(nickname, username, password)) {
             logger.info("新建用户成功");

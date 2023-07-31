@@ -405,7 +405,39 @@ public class OperateDB {
             throw new RuntimeException(e);
         }
     }
-
+    /* ******************************************************************************************************************
+     * 删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删  *
+     * 删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删  *
+     **************************************************************************************************************** */
+    /**
+     * @param id:
+     * @param select:
+     * @return boolean
+     * @author Axing
+     * @description 根据积分表的id删除积分变动数据（select为true时删除大会相关积分变动数据，为false时删除非大会相关积分变动数据）
+     * @date 2023/7/30 12:59
+     */
+    public boolean delete_points_info(String id, boolean select) {
+        try {
+            if (select) {
+                pstmt = conn.prepareStatement("delete from meeting where id=?");
+            } else {
+                pstmt = conn.prepareStatement("delete from no_meeting where id=?");
+            }
+            pstmt.setString(1, id);
+            if (pstmt.executeUpdate() == 1) {
+                logger.info("积分变动数据删除成功");
+                return true;
+            } else {
+                logger.error("积分变动数据删除失败");
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            logger.error("积分变动数据删除失败");
+            throw new RuntimeException(e);
+        }
+    }
 
     /* ******************************************************************************************************************
      * 改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改  *
@@ -785,7 +817,7 @@ public class OperateDB {
 
     /**
      * @param id:
-     * @param select:
+     * @param select: 为真时查询meeting表，为假时查询no_meeting表
      * @return ResultSet
      * @author Axing
      * @description 查询meeting表或no_meeting表中指定id和check的全部信息
@@ -820,8 +852,7 @@ public class OperateDB {
      */
     public ResultSet select_no_meeting_points(String user_id, int check) {
         try {
-            pstmt = conn.prepareStatement("SELECT id,try,inspect,activity,activity2,group_work,survey,material," +
-                    "duty,solve,complete,nickname,total,reject_reason FROM no_meeting WHERE user_id = ? AND `check` = ?");
+            pstmt = conn.prepareStatement("SELECT * FROM no_meeting WHERE user_id = ? AND `check` = ?");
             pstmt.setString(1, user_id);
             pstmt.setInt(2, check);
             rs = pstmt.executeQuery();
@@ -845,8 +876,7 @@ public class OperateDB {
      */
     public ResultSet select_meeting_points(String user_id, int check) {
         try {
-            pstmt = conn.prepareStatement("SELECT id, nickname, session, ordinal,attend,consider, recommendation, " +
-                    "bill, question, total, reject_reason FROM meeting WHERE user_id = ? AND `check` = ?");
+            pstmt = conn.prepareStatement("SELECT * FROM meeting WHERE user_id = ? AND `check` = ?");
             pstmt.setString(1, user_id);
             pstmt.setInt(2, check);
             rs = pstmt.executeQuery();
@@ -886,6 +916,32 @@ public class OperateDB {
     }
 
     /**
+     * @param token:
+     * @return boolean
+     * @author Axing
+     * @description 根据token查询user表，若存在则返回true，否则返回false
+     * @date 2023/7/30 12:21
+     */
+    public boolean select_boolean_token(String token) {
+        try {
+            pstmt = conn.prepareStatement("SELECT token FROM user WHERE token = ?");
+            pstmt.setString(1, token);
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                logger.info("查询token成功");
+                return true;
+            } else {
+                logger.error("查询token失败");
+                return false;
+            }
+        } catch (SQLException e) {
+            logger.error("查询token失败");
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * @param username:
      * @return ResultSet
      * @author Axing
@@ -916,7 +972,7 @@ public class OperateDB {
      */
     public ResultSet select_city_district(String city, String district) {
         try {
-            pstmt = conn.prepareStatement("SELECT user_id,nick_name FROM user_info WHERE city = ? AND district = ?");
+            pstmt = conn.prepareStatement("SELECT user_id,nick_name FROM user_info WHERE city = ? AND district like ?");
             pstmt.setString(1, city);
             pstmt.setString(2, district);
             rs = pstmt.executeQuery();
@@ -945,6 +1001,32 @@ public class OperateDB {
             return rs;
         } catch (SQLException e) {
             logger.error("查询姓氏失败");
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * @param userId:
+     * @return String
+     * @author Axing
+     * @description 根据user_id查询用户昵称
+     * @date 2023/7/27 20:49
+     */
+    public String select_nickname(int userId) {
+        try {
+            pstmt = conn.prepareStatement("SELECT nickname FROM user WHERE user_id = ?");
+            pstmt.setInt(1, userId);
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                logger.info("查询用户昵称成功");
+                return rs.getString("nickname");
+            } else {
+                logger.error("查询用户昵称失败");
+                return null;
+            }
+        } catch (SQLException e) {
+            logger.error("查询用户昵称失败");
             e.printStackTrace();
             throw new RuntimeException(e);
         }

@@ -73,7 +73,8 @@ public class SelectUserInfoServlet extends HttpServlet {
                 person.setPhone_number(rs.getString("phone_number"));
                 person.setPostal_code(rs.getString("postal_code"));
                 person.setResume(rs.getString("resume"));
-                person.setToken(rs.getString("token"));
+                person.setCity(rs.getString("city"));
+                person.setDistrict(rs.getString("district"));
             }
             logger.info("在数据库中查找指定用户成功");
         } catch (SQLException e) {

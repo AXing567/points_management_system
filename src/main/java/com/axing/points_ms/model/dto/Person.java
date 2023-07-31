@@ -10,6 +10,7 @@ package com.axing.points_ms.model.dto;
  * @version: 1.0
  */
 public class Person {
+
     private String user_id;
     private String username;
     private String nickname;
@@ -30,7 +31,6 @@ public class Person {
     private String phone_number;
     private String postal_code;
     private String resume;
-    private String token;
     private String register_time;
     private String city;
     private String district;
@@ -222,11 +222,4 @@ public class Person {
         this.resume = resume;
     }
 
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
 }

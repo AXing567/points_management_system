@@ -1,4 +1,4 @@
-package com.axing.points_ms.servlet.insert;
+package com.axing.points_ms.servlet.update;
 
 import com.axing.points_ms.model.dto.Person;
 import com.axing.points_ms.model.dto.Result;
@@ -20,15 +20,16 @@ import java.util.Map;
 /**
  * @projectName: points_management_system
  * @package: com.axing.points_ms.servlet.insert
- * @className: InsertUserInfoServlet
+ * @className: UpdateUserInfoServlet
  * @author: Axing
  * @description: 添加用户详细信息
  * @date: 2023/7/13 16:18
  * @version: 1.0
  */
-@WebServlet("/insertUserInfo")
-public class InsertUserInfoServlet extends HttpServlet {
-    Logger logger = LoggerFactory.getLogger(InsertUserInfoServlet.class);
+@WebServlet("/updateUserInfo")
+public class UpdateUserInfoServlet extends HttpServlet {
+    Logger logger = LoggerFactory.getLogger(UpdateUserInfoServlet.class);
+
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         logger.info("被调用");
@@ -37,7 +38,7 @@ public class InsertUserInfoServlet extends HttpServlet {
         OperateDB operateDB = new OperateDB();
         operateDB.connect2();
         Result result = new Result();
-        Map<String , Object> mapReturn = new HashMap<>();
+        Map<String, Object> mapReturn = new HashMap<>();
         Person person;
         Gson gson = new Gson();
 
@@ -45,12 +46,17 @@ public class InsertUserInfoServlet extends HttpServlet {
         String receiveData = ObtainData.obtain_data(request);
 
 //        存储前端传来的数据
-        person = gson.fromJson(receiveData, Person.class);
+        try {
+            person = gson.fromJson(receiveData, Person.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
         boolean check = operateDB.update_user_info(receiveData);
-        if (check){
+        if (check) {
             result.setSuccess(true);
             result.setMessage("数据上传成功");
-        }else {
+        } else {
             result.setSuccess(false);
             result.setMessage("数据上传失败");
         }

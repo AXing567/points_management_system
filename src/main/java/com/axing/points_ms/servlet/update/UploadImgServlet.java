@@ -1,4 +1,4 @@
-package com.axing.points_ms.servlet;
+package com.axing.points_ms.servlet.update;
 
 import com.axing.points_ms.model.dto.Result;
 import com.google.gson.Gson;
@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
@@ -50,17 +51,37 @@ public class UploadImgServlet extends HttpServlet {
             String userId = request.getParameter("userId");
             String fileName = part.getSubmittedFileName();
             String realPath = "D:\\points_management_system\\points_management_system\\src\\main\\webapp\\download\\";
-            String fullPath = renameFile(realPath + fileName, userId + "\\" + md5(fileName));
-            part.write(fullPath);
+            String md5FileName = md5(fileName);
+            String fullPath = renameFile(realPath + fileName, userId + "\\" + md5FileName);
+            File file = new File(fullPath);
 
 //            返回上传结果
+
+//            如果文件存在则返回“文件已存在”
+//            if(file.exists()){
+//                String path = fullPath.substring(fullPath.indexOf(userId));
+//                fullPath = "http://cn-sz-plc-1.openfrp.top:57655/" + path;
+//                result.setSuccess(false);
+//                result.setMessage("文件已存在");
+//                result.setPath(path);
+//                result.setFullPath(fullPath);
+//                result.setFileName(fileName);
+//                result.setMd5FileName(md5FileName);
+//                mapReturn.put("result", result);
+//                response.getWriter().write(gson.toJson(mapReturn));
+//                logger.info("文件已存在");
+//                return;
+//            }
+
+            part.write(fullPath);
             result.setSuccess(true);
             result.setMessage("文件上传成功");
             String path = fullPath.substring(fullPath.indexOf(userId));
-            fullPath = "http://cn-hk-bgp-9.openfrp.top:28224/download/" + path;
+            fullPath = "http://cn-sz-plc-1.openfrp.top:57655/" + path;
             result.setPath(path);
             result.setFullPath(fullPath);
             result.setFileName(fileName);
+            result.setMd5FileName(md5FileName);
             mapReturn.put("result", result);
             response.getWriter().write(gson.toJson(mapReturn));
             logger.info("文件上传成功");

@@ -41,7 +41,6 @@ public class LoginServlet extends HttpServlet {
         response.setContentType("text/html;charset=utf-8");
 
 
-
         Map<String, String> mapReceive;
         Map<String, Object> mapReturn = new HashMap<>();
         Gson gson = new Gson();
@@ -54,10 +53,25 @@ public class LoginServlet extends HttpServlet {
         mapReceive = gson.fromJson(receiveData, new TypeToken<Map<String, String>>() {
         }.getType());
         Result result = new Result();
+
         String username = mapReceive.get("username");
         String password = mapReceive.get("password");
         logger.info("获取了前端传来的数据");
 
+
+        if (mapReceive.containsKey("token")) {
+            String token = mapReceive.get("token");
+//            比对token是否正确,如果正确则返回登录成功
+            if(!token.equals("") && operateDB.select_boolean_token(mapReceive.get("token"))){
+                result.setSuccess(true);
+                result.setMessage("登录成功");
+                logger.info("登录成功");
+                mapReturn.put("result", result);
+                response.getWriter().write(gson.toJson(mapReturn));
+                logger.info("返回数据成功");
+            }
+            return;
+        }
 
 
 //        判断账号密码的正确性

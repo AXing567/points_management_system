@@ -24,6 +24,114 @@ public class NoMeetingPreview {
     private int complete;
     private String nickname;
     private String reject_reason;
+    private String supplement_try;
+    private String supplement_inspect;
+    private String supplement_activity;
+    private String supplement_activity2;
+    private String supplement_group_work;
+    private String supplement_survey;
+    private String supplement_material;
+    private String supplement_duty;
+    private String supplement_solve;
+    private String supplement_complete;
+    private String time;
+    private String picture;
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public String getPicture() {
+        return picture;
+    }
+
+    public void setPicture(String picture) {
+        this.picture = picture;
+    }
+
+    public String getSupplement_try() {
+        return supplement_try;
+    }
+
+    public void setSupplement_try(String supplement_try) {
+        this.supplement_try = supplement_try;
+    }
+
+    public String getSupplement_inspect() {
+        return supplement_inspect;
+    }
+
+    public void setSupplement_inspect(String supplement_inspect) {
+        this.supplement_inspect = supplement_inspect;
+    }
+
+    public String getSupplement_activity() {
+        return supplement_activity;
+    }
+
+    public void setSupplement_activity(String supplement_activity) {
+        this.supplement_activity = supplement_activity;
+    }
+
+    public String getSupplement_activity2() {
+        return supplement_activity2;
+    }
+
+    public void setSupplement_activity2(String supplement_activity2) {
+        this.supplement_activity2 = supplement_activity2;
+    }
+
+    public String getSupplement_group_work() {
+        return supplement_group_work;
+    }
+
+    public void setSupplement_group_work(String supplement_group_work) {
+        this.supplement_group_work = supplement_group_work;
+    }
+
+    public String getSupplement_survey() {
+        return supplement_survey;
+    }
+
+    public void setSupplement_survey(String supplement_survey) {
+        this.supplement_survey = supplement_survey;
+    }
+
+    public String getSupplement_material() {
+        return supplement_material;
+    }
+
+    public void setSupplement_material(String supplement_material) {
+        this.supplement_material = supplement_material;
+    }
+
+    public String getSupplement_duty() {
+        return supplement_duty;
+    }
+
+    public void setSupplement_duty(String supplement_duty) {
+        this.supplement_duty = supplement_duty;
+    }
+
+    public String getSupplement_solve() {
+        return supplement_solve;
+    }
+
+    public void setSupplement_solve(String supplement_solve) {
+        this.supplement_solve = supplement_solve;
+    }
+
+    public String getSupplement_complete() {
+        return supplement_complete;
+    }
+
+    public void setSupplement_complete(String supplement_complete) {
+        this.supplement_complete = supplement_complete;
+    }
 
     public String getReject_reason() {
         return reject_reason;

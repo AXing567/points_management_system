@@ -19,9 +19,55 @@ public class MeetingPreview {
     private String reject_reason;
     private int attend;
     private int consider;
+    private String supplement_consider;
     private int recommendation;
+    private String supplement_recommendation;
     private int bill;
+    private String supplement_bill;
     private int question;
+    private String supplement_question;
+
+    private String picture;
+
+    public String getPicture() {
+        return picture;
+    }
+
+    public void setPicture(String picture) {
+        this.picture = picture;
+    }
+
+    public String getSupplement_consider() {
+        return supplement_consider;
+    }
+
+    public void setSupplement_consider(String supplement_consider) {
+        this.supplement_consider = supplement_consider;
+    }
+
+    public String getSupplement_recommendation() {
+        return supplement_recommendation;
+    }
+
+    public void setSupplement_recommendation(String supplement_recommendation) {
+        this.supplement_recommendation = supplement_recommendation;
+    }
+
+    public String getSupplement_bill() {
+        return supplement_bill;
+    }
+
+    public void setSupplement_bill(String supplement_bill) {
+        this.supplement_bill = supplement_bill;
+    }
+
+    public String getSupplement_question() {
+        return supplement_question;
+    }
+
+    public void setSupplement_question(String supplement_question) {
+        this.supplement_question = supplement_question;
+    }
 
     public String getReject_reason() {
         return reject_reason;

@@ -60,6 +60,7 @@ public class UpdateMeetingCheckOrNoMeetingCheck extends HttpServlet {
 
 
 //        返回数据
+        mapReturn.put("result", result);
         response.getWriter().write(gson.toJson(mapReturn));
         logger.info("返回数据成功");
 

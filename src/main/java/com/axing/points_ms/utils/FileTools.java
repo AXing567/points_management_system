@@ -17,7 +17,7 @@ public class FileTools {
      * @param newFileNamePath:
      * @return String
      * @author Axing
-     * @description 输入旧文件名和新文件名，返回新文件名（旧文件名可含路径）
+     * @description 重命名文件（不影响路径，不影响扩展名）
      * @date 2023/7/11 15:41
      */
     public static String renameFile(String oldFileNamePath, String newFileNamePath) {

@@ -25,7 +25,7 @@ import java.util.Map;
  * @package: com.axing.points_ms.servlet.user_preview_review
  * @className: ReviewPointChangesServlet
  * @author: Axing
- * @description: 预览积分变动信息（可以根据user_id，select,check查看大会期间及闭会期间的积分变动信息）(select:1大会期间，0闭会期间)
+ * @description: 预览多条积分变动信息（可以根据user_id，select,check查看大会期间及闭会期间的积分变动信息）(select:1大会期间，0闭会期间)
  * @date: 2023/7/20 15:23
  * @version: 1.0
  */
@@ -58,7 +58,7 @@ public class ReviewPointChangesServlet extends HttpServlet {
 
 //        查找指定数据集
 //        (select:1大会期间，0闭会期间)
-        if (select == 1){
+        if (select == 1) {
             rs = operateDB.select_meeting_points(user_id, check);
             try {
                 while (rs.next()) {
@@ -68,12 +68,24 @@ public class ReviewPointChangesServlet extends HttpServlet {
                     meetingPreview.setSession(rs.getString("session"));
                     meetingPreview.setOrdinal(rs.getString("ordinal"));
                     meetingPreview.setAttend(rs.getInt("attend"));
+
+                    meetingPreview.setConsider(rs.getInt("consider"));
+                    meetingPreview.setSupplement_consider(rs.getString("supplement_consider"));
+
                     meetingPreview.setRecommendation(rs.getInt("recommendation"));
+                    meetingPreview.setSupplement_recommendation(rs.getString("supplement_recommendation"));
+
                     meetingPreview.setBill(rs.getInt("bill"));
+                    meetingPreview.setSupplement_bill(rs.getString("supplement_bill"));
+
                     meetingPreview.setQuestion(rs.getInt("question"));
+                    meetingPreview.setSupplement_question(rs.getString("supplement_question"));
+
                     meetingPreview.setTotal(rs.getString("total"));
                     meetingPreview.setNickname(rs.getString("nickname"));
                     meetingPreview.setReject_reason(rs.getString("reject_reason"));
+                    meetingPreview.setPicture(rs.getString("picture"));
+
                     mapReturn.put("meeting" + id, meetingPreview);
                 }
                 logger.info("查找指定数据集成功");
@@ -82,7 +94,7 @@ public class ReviewPointChangesServlet extends HttpServlet {
                 logger.error("查找指定数据集失败");
                 throw new RuntimeException(e);
             }
-        } else if(select == 0) {
+        } else if (select == 0) {
             rs = operateDB.select_no_meeting_points(user_id, check);
             try {
                 while (rs.next()) {
@@ -90,19 +102,33 @@ public class ReviewPointChangesServlet extends HttpServlet {
                     String id = rs.getString("id");
                     noMeetingPreview.setId(id);
                     noMeetingPreview.setTry_(rs.getInt("try"));
+                    noMeetingPreview.setSupplement_try(rs.getString("supplement_try"));
                     noMeetingPreview.setInspect(rs.getInt("inspect"));
+                    noMeetingPreview.setSupplement_inspect(rs.getString("supplement_inspect"));
                     noMeetingPreview.setActivity(rs.getInt("activity"));
+                    noMeetingPreview.setSupplement_activity(rs.getString("supplement_activity"));
                     noMeetingPreview.setActivity2(rs.getInt("activity2"));
+                    noMeetingPreview.setSupplement_activity2(rs.getString("supplement_activity2"));
                     noMeetingPreview.setGroup_work(rs.getInt("group_work"));
+                    noMeetingPreview.setSupplement_group_work(rs.getString("supplement_group_work"));
                     noMeetingPreview.setSurvey(rs.getInt("survey"));
+                    noMeetingPreview.setSupplement_survey(rs.getString("supplement_survey"));
                     noMeetingPreview.setMaterial(rs.getInt("material"));
+                    noMeetingPreview.setSupplement_material(rs.getString("supplement_material"));
                     noMeetingPreview.setDuty(rs.getInt("duty"));
+                    noMeetingPreview.setSupplement_duty(rs.getString("supplement_duty"));
                     noMeetingPreview.setSolve(rs.getInt("solve"));
+                    noMeetingPreview.setSupplement_solve(rs.getString("supplement_solve"));
                     noMeetingPreview.setComplete(rs.getInt("complete"));
+                    noMeetingPreview.setSupplement_complete(rs.getString("supplement_complete"));
+
                     noMeetingPreview.setNickname(rs.getString("nickname"));
                     noMeetingPreview.setTotal(rs.getInt("total"));
                     noMeetingPreview.setReject_reason(rs.getString("reject_reason"));
+                    noMeetingPreview.setTime(rs.getString("time"));
+                    noMeetingPreview.setPicture(rs.getString("picture"));
                     mapReturn.put("no_meeting" + id, noMeetingPreview);
+
                 }
                 logger.info("查找指定数据集成功");
             } catch (SQLException e) {

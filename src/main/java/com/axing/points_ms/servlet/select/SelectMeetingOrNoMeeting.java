@@ -27,7 +27,7 @@ import java.util.Map;
  * @package: com.axing.points_ms.servlet.select
  * @className: SelectMeetingOrNoMeeting
  * @author: Axing
- * @description: TODO
+ * @description: 根据记录id查询大会期间或闭会期间的“某一条信息”（select:1大会期间，0闭会期间）
  * @date: 2023/7/22 18:10
  * @version: 1.0
  */
@@ -45,8 +45,8 @@ public class SelectMeetingOrNoMeeting extends HttpServlet {
         Map<String, Object> mapReturn = new HashMap<>();
         Map<String, String> mapReceive;
         Gson gson = new Gson();
-        String receiveData;
         ResultSet rs;
+        String receiveData;
         Meeting meeting = new Meeting();
         NoMeeting noMeeting = new NoMeeting();
 

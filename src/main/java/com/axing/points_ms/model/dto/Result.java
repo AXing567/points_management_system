@@ -18,6 +18,15 @@ public class Result {
     private String fullPath; // 完整文件路径
     private String path; // 文件路径
     private String fileName; // 文件名
+    private String md5FileName; // md5运算后的文件名
+
+    public String getMd5FileName() {
+        return md5FileName;
+    }
+
+    public void setMd5FileName(String md5FileName) {
+        this.md5FileName = md5FileName;
+    }
 
     public Result setLoginRegisterResult(boolean success, String message, String permission, String token) {
         this.success = success;
