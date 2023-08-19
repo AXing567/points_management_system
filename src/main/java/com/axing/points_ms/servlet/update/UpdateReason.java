@@ -59,12 +59,12 @@ public class UpdateReason extends HttpServlet {
 
         if (operateDB.update_reason(id, reason, select == 1)) {
             result.setSuccess(true);
-            result.setMessage("更改check字段成功");
-            logger.info("更改check字段成功");
+            result.setMessage("更改reason字段成功");
+            logger.info("更改reason字段成功");
         } else {
             result.setSuccess(false);
-            result.setMessage("更改check字段失败");
-            logger.error("更改check字段失败");
+            result.setMessage("更改reason字段失败");
+            logger.error("更改reason字段失败");
         }
 
 

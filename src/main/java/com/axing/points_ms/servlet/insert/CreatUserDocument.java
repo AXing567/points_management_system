@@ -1,28 +1,57 @@
-package com.axing.points_ms;
+package com.axing.points_ms.servlet.insert;
 
+import com.axing.points_ms.model.dto.Result;
+import com.axing.points_ms.servlet.user_preview_review.ReviewPointChangesServlet;
+import com.axing.points_ms.utils.ObtainData;
+import com.axing.points_ms.utils.OperateDB;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.FileOutputStream;
-import java.sql.*;
+import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
-public class Test {
-    public static void main(String[] args) {
-        int userId = 19; // 用户ID
+@WebServlet("/CreatUserDocument")
+public class CreatUserDocument extends HttpServlet {
+    Logger logger = LoggerFactory.getLogger(ReviewPointChangesServlet.class);
 
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        logger.info("被调用");
+        request.setCharacterEncoding("utf-8");
+        response.setContentType("text/html;charset=utf8");
+        OperateDB operateDB = new OperateDB();
+        operateDB.connect2();
+        Result result = new Result();
+        Map<String, Object> mapReturn = new HashMap<String, Object>();
+        Map<String, String> mapReceive = new HashMap<String, String>();
+        Gson gson = new Gson();
+        String receiveData = null;
+        ResultSet rs = null;
+
+//        接收前端数据 id , check
+        receiveData = ObtainData.obtain_data(request);
+        mapReceive = gson.fromJson(receiveData, new TypeToken<Map<String, String>>() {
+        }.getType());
+        String userId = mapReceive.get("userId");
+        logger.info("获取前端数据成功");
+
+//        根据id查询用户信息
+        rs = operateDB.select_user_info(userId);
         try {
-            // 连接数据库
-            Connection conn;
-            Class.forName("com.mysql.jdbc.Driver");
-            String url = "jdbc:mysql://localhost:3306/points_management_system";
-            conn = DriverManager.getConnection(url, "root", "123");
-            // 查询用户信息
-            String sql = "SELECT * FROM user_info WHERE user_id = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, userId);
-            ResultSet rs = pstmt.executeQuery();
-
             if (rs.next()) {
                 // 创建 Word 文档对象
                 XWPFDocument document = new XWPFDocument();
@@ -80,20 +109,29 @@ public class Test {
                                 + userId + "\\user_document.docx");
                 document.write(out);
                 out.close();
-
-                System.out.println("用户文档生成成功！");
+                result.setMessage("用户文档生成成功");
+                result.setSuccess(true);
+                result.setPath(userId + "/user_document.docx");
+                result.setFullPath("https://w204882q59.zicp.fun/download/" + userId + "/user_document.docx");
+                logger.info("用户文档生成成功");
+                logger.info("fullPath" + "https://w204882q59.zicp.fun/download/" + userId + "/user_document.docx");
             } else {
-                System.out.println("找不到对应的用户信息！");
+                result.setMessage("找不到对应的用户信息");
+                result.setSuccess(false);
+                logger.error("找不到对应的用户信息！");
             }
-
-            // 关闭资源
-            rs.close();
-            pstmt.close();
-            conn.close();
         } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
+            result.setMessage("打印用户信息异常");
+            result.setSuccess(false);
+            logger.error("打印用户信息异常！");
         }
+
+
+//        返回数据
+        mapReturn.put("result", result);
+        response.getWriter().write(gson.toJson(mapReturn));
+        logger.info("返回数据成功");
+
+
     }
 }

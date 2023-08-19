@@ -53,13 +53,14 @@ public class ReviewPointChangesServlet extends HttpServlet {
         String user_id = mapReceive.get("user_id");
         int check = Integer.parseInt(mapReceive.get("check"));
         int select = Integer.parseInt(mapReceive.get("select"));
+        int all = Integer.parseInt(mapReceive.getOrDefault("all", "0")); // 1表示查看全部，0表示查看指定id的积分变动信息 （如果没传all那么默认为0）
         logger.info("获取前端数据成功");
 
 
 //        查找指定数据集
 //        (select:1大会期间，0闭会期间)
         if (select == 1) {
-            rs = operateDB.select_meeting_points(user_id, check);
+            rs = operateDB.select_meeting_points(user_id, check, all == 1);
             try {
                 while (rs.next()) {
                     MeetingPreview meetingPreview = new MeetingPreview();
@@ -86,7 +87,7 @@ public class ReviewPointChangesServlet extends HttpServlet {
                     meetingPreview.setReject_reason(rs.getString("reject_reason"));
                     meetingPreview.setPicture(rs.getString("picture"));
 
-                    mapReturn.put("meeting" + id, meetingPreview);
+                    mapReturn.put(id, meetingPreview);
                 }
                 logger.info("查找指定数据集成功");
             } catch (SQLException e) {
@@ -95,7 +96,7 @@ public class ReviewPointChangesServlet extends HttpServlet {
                 throw new RuntimeException(e);
             }
         } else if (select == 0) {
-            rs = operateDB.select_no_meeting_points(user_id, check);
+            rs = operateDB.select_no_meeting_points(user_id, check, all == 1);
             try {
                 while (rs.next()) {
                     NoMeetingPreview noMeetingPreview = new NoMeetingPreview();
@@ -127,7 +128,7 @@ public class ReviewPointChangesServlet extends HttpServlet {
                     noMeetingPreview.setReject_reason(rs.getString("reject_reason"));
                     noMeetingPreview.setTime(rs.getString("time"));
                     noMeetingPreview.setPicture(rs.getString("picture"));
-                    mapReturn.put("no_meeting" + id, noMeetingPreview);
+                    mapReturn.put(id, noMeetingPreview);
 
                 }
                 logger.info("查找指定数据集成功");

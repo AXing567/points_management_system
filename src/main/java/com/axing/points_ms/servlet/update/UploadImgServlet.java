@@ -77,7 +77,7 @@ public class UploadImgServlet extends HttpServlet {
             result.setSuccess(true);
             result.setMessage("文件上传成功");
             String path = fullPath.substring(fullPath.indexOf(userId));
-            fullPath = "http://cn-sz-plc-1.openfrp.top:57655/" + path;
+            fullPath = "https://w204882q59.zicp.fun/" + path;
             result.setPath(path);
             result.setFullPath(fullPath);
             result.setFileName(fileName);

@@ -29,6 +29,7 @@ import java.util.Map;
 @WebServlet("/auditUser")
 public class AuditUserServlet extends HttpServlet {
     Logger logger = LoggerFactory.getLogger(AuditUserServlet.class);
+
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         logger.info("被调用");
@@ -55,10 +56,19 @@ public class AuditUserServlet extends HttpServlet {
         boolean check3 = operateDB.insert_user_info(user_id);
         if (check && check2 && check3) {
             result.setSuccess(true);
-            result.setMessage("用户" + user_id + "审核成功");
+            result.setMessage("审核成功");
         } else {
             result.setSuccess(false);
-            result.setMessage("用户" + user_id + "审核失败");
+            result.setMessage("审核失败");
+            if (check) {
+                operateDB.update_user_review(user_id, 0);
+            }
+            if (check2) {
+                operateDB.delete_user(user_id);
+            }
+            if (check3) {
+                operateDB.delete_user_info(user_id);
+            }
         }
         mapReturn.put("result", result);
         response.getWriter().write(gson.toJson(mapReturn));

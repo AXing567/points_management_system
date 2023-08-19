@@ -1,4 +1,4 @@
-package com.axing.points_ms.servlet;
+package com.axing.points_ms.servlet.delete;
 
 import com.axing.points_ms.model.dto.Result;
 import com.axing.points_ms.utils.ObtainData;

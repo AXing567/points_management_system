@@ -263,38 +263,38 @@ public class OperateDB {
      * @param receiveGson: 接收到的json数据
      * @return boolean 插入非大会相关积分变动数据是否成功
      * @author Axing
-     * @description 插入非大会相关积分变动数据
+     * @description 插入非大会相关积分变动数据(仅在此函数中使用了getOrDefault方法以确保可以有部分变量不向后端传递 ）
      * @date 2023/7/13 9:52
      */
     public boolean insert_no_meeting(String receiveGson) {
         Map<String, String> map = new Gson().fromJson(receiveGson, new TypeToken<Map<String, String>>() {
         }.getType());
         String user_id = map.get("user_id");
+        String add_id = map.get("add_id");
         String nickname = map.get("nickname");
         String time = map.get("time");
-        int try1 = Integer.parseInt(map.get("try1"));
-        String supplement_try = map.get("supplement_try");
-        int inspect = Integer.parseInt(map.get("inspect"));
-        String supplement_inspect = map.get("supplement_inspect");
-        int activity = Integer.parseInt(map.get("activity"));
-        String supplement_activity = map.get("supplement_activity");
-        int activity2 = Integer.parseInt(map.get("activity2"));
-        String supplement_activity2 = map.get("supplement_activity2");
-        int group_work = Integer.parseInt(map.get("group_work"));
-        String supplement_group_work = map.get("supplement_group_work");
-        int survey = Integer.parseInt(map.get("survey"));
-        String supplement_survey = map.get("supplement_survey");
-        int material = Integer.parseInt(map.get("material"));
-        String supplement_material = map.get("supplement_material");
-        int duty = Integer.parseInt(map.get("duty"));
-        String supplement_duty = map.get("supplement_duty");
-        int solve = Integer.parseInt(map.get("solve"));
-        String supplement_solve = map.get("supplement_solve");
-        int complete = Integer.parseInt(map.get("complete"));
-        String supplement_complete = map.get("supplement_complete");
         String picture = map.get("picture");
+        int try1 = Integer.parseInt(map.getOrDefault("try1", "0"));
+        String supplement_try = map.getOrDefault("supplement_try", "");
+        int inspect = Integer.parseInt(map.getOrDefault("inspect", "0"));
+        String supplement_inspect = map.getOrDefault("supplement_inspect", "");
+        int activity = Integer.parseInt(map.getOrDefault("activity", "0"));
+        String supplement_activity = map.getOrDefault("supplement_activity", "");
+        int activity2 = Integer.parseInt(map.getOrDefault("activity2", "0"));
+        String supplement_activity2 = map.getOrDefault("supplement_activity2", "");
+        int group_work = Integer.parseInt(map.getOrDefault("group_work", "0"));
+        String supplement_group_work = map.getOrDefault("supplement_group_work", "");
+        int survey = Integer.parseInt(map.getOrDefault("survey", "0"));
+        String supplement_survey = map.getOrDefault("supplement_survey", "");
+        int material = Integer.parseInt(map.getOrDefault("material", "0"));
+        String supplement_material = map.getOrDefault("supplement_material", "");
+        int duty = Integer.parseInt(map.getOrDefault("duty", "0"));
+        String supplement_duty = map.getOrDefault("supplement_duty", "");
+        int solve = Integer.parseInt(map.getOrDefault("solve", "0"));
+        String supplement_solve = map.getOrDefault("supplement_solve", "");
+        int complete = Integer.parseInt(map.getOrDefault("complete", "0"));
+        String supplement_complete = map.getOrDefault("supplement_complete", "");
         int total = try1 + inspect + activity + activity2 + group_work + survey + material + duty + solve + complete;
-        String add_id = map.get("add_id");
         try {
             pstmt = conn.prepareStatement("insert into no_meeting" +
                     "(user_id,nickname,time,try,supplement_try,inspect,supplement_inspect,activity,supplement_activity,activity2,supplement_activity2," +
@@ -349,22 +349,23 @@ public class OperateDB {
      * @description 插入找回密码数据
      * @date 2023/7/13 13:29
      */
-    public boolean insert_find_password(String username, String nickname, String password) {
+    public boolean insert_find_password(String username, String nickname, String password ) {
         try {
-            pstmt = conn.prepareStatement("insert into find_password_review(username,nickname,password) values(?,?,?)");
+            pstmt = conn.prepareStatement
+                    ("insert into find_password_review(username,nickname,password) values(?,?,?)");
             pstmt.setString(1, username);
             pstmt.setString(2, nickname);
             pstmt.setString(3, password);
             if (pstmt.executeUpdate() == 1) {
-                logger.info("找回密码成功");
+                logger.info("用户"+nickname+"已提交新密码审核");
                 return true;
             } else {
-                logger.error("找回密码失败");
+                logger.error("用户"+nickname+"提交新密码审核失败");
                 return false;
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            logger.error("找回密码失败（SQLException）");
+            logger.error("用户"+nickname+"提交新密码审核失败（SQLException）");
             throw new RuntimeException(e);
         }
     }
@@ -405,10 +406,12 @@ public class OperateDB {
             throw new RuntimeException(e);
         }
     }
+
     /* ******************************************************************************************************************
      * 删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删  *
      * 删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删删  *
      **************************************************************************************************************** */
+
     /**
      * @param id:
      * @param select:
@@ -439,11 +442,116 @@ public class OperateDB {
         }
     }
 
+    /**
+     * @param userId:
+     * @return boolean
+     * @author Axing
+     * @description 根据用户id删除用户
+     * @date 2023/7/31 21:29
+     */
+    public boolean delete_user(String userId) {
+        try {
+            pstmt = conn.prepareStatement("delete from user where user_id=?");
+            pstmt.setString(1, userId);
+            if (pstmt.executeUpdate() == 1) {
+                logger.info("用户删除成功");
+                return true;
+            } else {
+                logger.error("用户删除失败");
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            logger.error("用户删除失败");
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * @param userId:
+     * @return boolean
+     * @author Axing
+     * @description 根据用户id删除用户信息
+     * @date 2023/7/31 21:30
+     */
+    public boolean delete_user_info(String userId) {
+        try {
+            pstmt = conn.prepareStatement("delete from user_info where user_id=?");
+            pstmt.setString(1, userId);
+            if (pstmt.executeUpdate() == 1) {
+                logger.info("用户信息删除成功");
+                return true;
+            } else {
+                logger.error("用户信息删除失败");
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            logger.error("用户信息删除失败");
+            throw new RuntimeException(e);
+        }
+    }
     /* ******************************************************************************************************************
      * 改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改  *
      * 改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改改  *
      **************************************************************************************************************** */
 
+    /**
+     * @param username:
+     * @param check:
+     * @return boolean
+     * @author Axing
+     * @description 修改指定username的所有记录的check_find字段为check
+     * @date 2023/8/19 15:54
+     */
+    public boolean update_find_password_check(String username , String check){
+        try {
+            pstmt = conn.prepareStatement("update find_password_review set check_find=? where username= ?");
+            pstmt.setString(1, check);
+            pstmt.setString(2, username);
+            if (pstmt.executeUpdate() >0) {
+                logger.info("找回密码验证码更新成功");
+                return true;
+            } else {
+                logger.error("找回密码验证码更新失败");
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            logger.error("找回密码验证码更新失败");
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * @param username:
+     * @param password:
+     * @return boolean
+     * @author Axing
+     * @description 在user表中修改指定username的密码为password（加密后的密码）
+     * @date 2023/8/19 15:55
+     */
+    public boolean update_user_password(String username , String password){
+        String salt = Encipher.getStringRandom(6);
+        password = Encipher.md5(Encipher.md5(password) + salt);
+        try {
+            pstmt = conn.prepareStatement("update user set password=? , salt = ? where username=?");
+            pstmt.setString(1, password);
+            pstmt.setString(2, salt);
+            pstmt.setString(3, username);
+            if (pstmt.executeUpdate() == 1) {
+                logger.info("用户密码更新成功");
+                return true;
+            } else {
+                logger.error("用户密码更新失败");
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            logger.error("用户密码更新失败");
+            throw new RuntimeException(e);
+        }
+    }
     public boolean update_no_meeting(String receiveGson) {
         Map<String, String> mapReceive = new Gson().fromJson(receiveGson, new TypeToken<Map<String, String>>() {
         }.getType());
@@ -623,7 +731,7 @@ public class OperateDB {
      * @param select:
      * @return boolean
      * @author Axing
-     * @description 根据select选择表（true为meeting表；反之no_meeting表），根据积分记录id更新原因，
+     * @description 根据select选择表（true为meeting表；反之no_meeting表），根据积分表中的记录id更新原因，
      * @date 2023/7/22 17:31
      */
     public boolean update_reason(String id, String reason, boolean select) {
@@ -816,6 +924,27 @@ public class OperateDB {
      **************************************************************************************************************** */
 
     /**
+     * @param :
+     * @return ResultSet
+     * @author Axing
+     * @description 查找find_password_review表中每个用户最新密码修改记录
+     * @date 2023/8/19 15:30
+     */
+    public ResultSet select_find_password_review(){
+        try {
+            pstmt = conn.prepareStatement("SELECT * FROM find_password_review WHERE (username, id) IN" +
+                    " ( SELECT username, MAX(id) FROM find_password_review GROUP BY username);");
+            rs = pstmt.executeQuery();
+            logger.info("查询find_password_review表成功");
+            return rs;
+        } catch (SQLException e) {
+            logger.error("查询find_password_review表失败");
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * @param id:
      * @param select: 为真时查询meeting表，为假时查询no_meeting表
      * @return ResultSet
@@ -850,11 +979,17 @@ public class OperateDB {
      * @description 根据user_id和check字段查询no_meeting表中的积分记录（用于用户和管理员查看积分记录）
      * @date 2023/7/22 10:30
      */
-    public ResultSet select_no_meeting_points(String user_id, int check) {
+    public ResultSet select_no_meeting_points(String user_id, int check, boolean all) {
         try {
-            pstmt = conn.prepareStatement("SELECT * FROM no_meeting WHERE user_id = ? AND `check` = ?");
-            pstmt.setString(1, user_id);
-            pstmt.setInt(2, check);
+            if (all) {
+                pstmt = conn.prepareStatement("SELECT * FROM no_meeting WHERE `check` = ?");
+                pstmt.setInt(1, check);
+
+            } else {
+                pstmt = conn.prepareStatement("SELECT * FROM no_meeting WHERE user_id = ? AND `check` = ?");
+                pstmt.setString(1, user_id);
+                pstmt.setInt(2, check);
+            }
             rs = pstmt.executeQuery();
             logger.info("查询非会议期间指定用户、指定check字段的记录成功");
             return rs;
@@ -874,11 +1009,16 @@ public class OperateDB {
      * @description 查询会议期间指定user_id、check字段的记录
      * @date 2023/7/20 15:41
      */
-    public ResultSet select_meeting_points(String user_id, int check) {
+    public ResultSet select_meeting_points(String user_id, int check, boolean all) {
         try {
-            pstmt = conn.prepareStatement("SELECT * FROM meeting WHERE user_id = ? AND `check` = ?");
-            pstmt.setString(1, user_id);
-            pstmt.setInt(2, check);
+            if (all) {
+                pstmt = conn.prepareStatement("SELECT * FROM meeting WHERE `check` = ?");
+                pstmt.setInt(1, check);
+            } else {
+                pstmt = conn.prepareStatement("SELECT * FROM meeting WHERE user_id = ? AND `check` = ?");
+                pstmt.setString(1, user_id);
+                pstmt.setInt(2, check);
+            }
             rs = pstmt.executeQuery();
             logger.info("查询会议期间指定用户、指定check字段的记录成功");
             return rs;
@@ -1022,11 +1162,11 @@ public class OperateDB {
                 logger.info("查询用户昵称成功");
                 return rs.getString("nickname");
             } else {
-                logger.error("查询用户昵称失败");
+                logger.error("查无此人");
                 return null;
             }
         } catch (SQLException e) {
-            logger.error("查询用户昵称失败");
+            logger.error("查询用户昵称失败（SQLException）");
             e.printStackTrace();
             throw new RuntimeException(e);
         }
@@ -1112,9 +1252,12 @@ public class OperateDB {
             pstmt.setString(1, userName);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
+                logger.info("查询用户id成功");
                 return rs.getString("user_id");
+            }else {
+                logger.error("查无此人");
+                return null;
             }
-            logger.info("查询用户id成功");
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("查询用户id失败");

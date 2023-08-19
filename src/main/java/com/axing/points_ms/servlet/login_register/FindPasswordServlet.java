@@ -32,7 +32,7 @@ public class FindPasswordServlet extends HttpServlet {
         request.setCharacterEncoding("utf-8");
         response.setContentType("text/html;charset=utf-8");
         Map<String, String> mapReceive;
-        Map<String, String> mapReturn = new HashMap<>();
+        Map<String, Object> mapReturn = new HashMap<>();
         Result result = new Result();
         Gson gson = new Gson();
         OperateDB operateDB = new OperateDB();
@@ -43,11 +43,25 @@ public class FindPasswordServlet extends HttpServlet {
         }.getType());
 
         String username = mapReceive.get("username");
-        String nickname = mapReceive.get("nickname");
         String password = mapReceive.get("password");
+        String tempId = operateDB.selectUserId(username);
+        int userId = Integer.parseInt(tempId==null?"0":tempId);
+        String nickname  = operateDB.select_nickname(userId);
+
+//        检测用户是否存在
+        if(userId==0){
+            result.setSuccess(false);
+            result.setMessage("用户不存在");
+            logger.info("用户不存在");
+            mapReturn.put("result", gson.toJson(result));
+            response.getWriter().write(gson.toJson(mapReturn));
+            logger.info("返回数据成功");
+            return;
+        }
+
 
 //        将数据存储至密码找回表
-        boolean check = operateDB.insert_find_password(username, nickname, password);
+        boolean check = operateDB.insert_find_password(username, nickname, password );
         if (check) {
             result.setSuccess(true);
             result.setMessage("新密码已提交审核");

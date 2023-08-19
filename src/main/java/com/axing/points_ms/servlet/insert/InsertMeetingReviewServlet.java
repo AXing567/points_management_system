@@ -75,12 +75,12 @@ public class InsertMeetingReviewServlet extends HttpServlet {
                     recommendation, supplement_recommendation, bill, supplement_bill, question, supplement_question,
                     nickname, add_id, picture, user_id, total);
             if (check) {
-                logger.info("插入成功");
-                result.setMessage("插入成功");
+                logger.info("上传成功");
+                result.setMessage("上传成功");
                 result.setSuccess(true);
             } else {
-                logger.info("插入失败");
-                result.setMessage("插入失败");
+                logger.info("上传失败");
+                result.setMessage("上传失败");
                 result.setSuccess(false);
             }
 

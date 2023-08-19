@@ -55,10 +55,10 @@ public class RejectRegisterServlet extends HttpServlet {
 
         if (check) {
             result.setSuccess(true);
-            result.setMessage("用户" + user_id + "已被拒绝注册");
+            result.setMessage("用户已被拒绝注册");
         } else {
             result.setSuccess(false);
-            result.setMessage("用户" + user_id + "操作失败");
+            result.setMessage("用户操作失败");
         }
         mapReturn.put("result", result);
         response.getWriter().write(gson.toJson(mapReturn));

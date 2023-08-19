@@ -22,7 +22,7 @@ import java.util.Map;
  * @package: com.axing.points_ms.servlet
  * @className: RegisterServlet
  * @author: Axing
- * @description: TODO
+ * @description: 用户注册接口
  * @date: 2023/7/9 15:43
  * @version: 1.0
  */
